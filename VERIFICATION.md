@@ -179,3 +179,8 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Clean npm ci and the complete current local CI sequence passed: typecheck (154 files, 0 errors/warnings/hints), boundary guard, 125 native/integration tests, build, 38 production-browser tests, Actionlint and audit (0 vulnerabilities). Hosted CI is unrun.
 - Measured fresh 360×800, cache-disabled, no-scroll Resource Timing transfer: Home 14,341 B, detail 15,154 B, Watch 13,325 B. These are explicitly placeholder-poster measurements; they do not verify the real-image budget or Lighthouse gate.
 - Every prompt verification item is reported in docs/PHASE1-CHECKPOINT.md as local pass, partial, pending or blocked. This checkpoint precedes tasks 1.23–1.38, so the full verification must repeat after their completion. Real TMDb/R2/Access/ads/purge/CI/deployment checks remain blocked by missing owner setup; no false live result is marked passed.
+
+## Deferred deployment verification
+
+- **1.26:** Code complete; live custom-domain verification deferred to the deployment phase (owner deferred domain purchase; deployment setup is handled separately after Phase 1).
+- Owner chose ScreenPeek.io; no domain has been purchased or connected. Continue local Phase 1 work and append any account/domain/credential-dependent verification here.

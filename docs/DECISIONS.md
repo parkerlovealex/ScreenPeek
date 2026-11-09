@@ -10,3 +10,5 @@
 - Owner selected **best-effort buffered counters**, labelled **approximate**, instead of adding Durable Objects. Keep D1 writes batched. Memory can be lost on isolate shutdown; KV is not an atomic counter. Visibility within 60 seconds is a healthy-service target, not a durability guarantee. Do not claim exact counts or add Durable Objects without a new owner instruction.
 
 - Owner approved a small image visibility observer with a no-JavaScript image fallback to meet the first-screen byte budget. This is an explicit exception to the design document’s allowed-JavaScript list.
+
+- Owner deferred purchase of ScreenPeek.io and all deployment setup until after Phase 1. Leave 1.26 unchecked with code complete; continue remaining tasks after recording live account/domain/credential checks in VERIFICATION.md.

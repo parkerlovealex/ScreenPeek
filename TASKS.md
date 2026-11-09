@@ -27,6 +27,7 @@
 - [x] 1.24 CI speed gate: byte-budget hard fail (>~100 KB first screen) + Lighthouse mobile ≥90 report on home/detail/list (ads as placeholders)
 - [x] 1.25 Speculation-rules prefetch on grids + CSS fade-in (no JS files added)
 - [ ] 1.26 R2 custom domain + immutable 1-year cache headers; width/height on all images (CLS 0)
+  - Code complete; live custom-domain verification deferred to the deployment phase (owner deferred domain purchase; deployment setup is handled separately after Phase 1).
 - [ ] 1.27 Detail originality: facts line + Q&A block (+ FAQ schema) + "Updated" date; schema set WITHOUT third-party aggregateRating
 - [ ] 1.28 Filter/sort URL control: noindex + canonical to clean URL
 - [ ] 1.29 Redirects table honoured before render (301); owner-deleted titles → 410; 404s logged to `notfound_log`
