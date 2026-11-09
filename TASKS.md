@@ -13,7 +13,7 @@
 - [x] 1.10 TV season + episode pages
 - [x] 1.11 Cast/person pages with filmography
 - [x] 1.12 Genre / collection / language grids; `/new/`, `/top10/`, `/upcoming/`
-- [ ] 1.13 Trailer page (click-to-load YouTube facade) + similar rail
+- [x] 1.13 Trailer page (click-to-load YouTube facade) + similar rail
 - [ ] 1.14 Search: `/api/search` (FTS5) + suggestions UI + `/search/` results
 - [ ] 1.15 Watch page: geo country, provider groups, `/go/` outbound, JustWatch credit, no popunder
 - [ ] 1.16 `/go/[slug]` function: KV rules (country/device), batched click log, safe fallbacks

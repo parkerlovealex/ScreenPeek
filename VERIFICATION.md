@@ -99,3 +99,10 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 18 passed, including all six hubs at 360px, language page3, styled missing taxonomy and canonical type aliases. Every poster grid remains at most 24 cards; Top10 is a ten-item ranked list.
 - Typecheck: 86 files, 0 errors/warnings/hints. Build and boundary check pass.
 - Local six-title sample collection added without taking ownership of pre-existing unowned data. Migrated seed/removal test passed again, preserving unrelated references.
+
+## 1.13 — click-to-load trailer
+
+- Actual local D1 trailer tests: 6 passed, covering strict keys, movie/TV lookup, visibility/status, missing-key indexing/cache and failures.
+- Production browser suite: 20 passed. Trailer-specific checks confirm zero YouTube requests/iframes before clicking, then an iframe only after the explicit click; its external response is simulated. Missing trailers show no fake player; unknown title returns 404.
+- Loader is 871 source bytes, no third-party thumbnail/preconnect, reserved 16:9 frame, normal YouTube-link fallback without JavaScript. Test key is temporary on an owned negative-ID fixture and restored after the test.
+- Typecheck: 91 files, 0 errors/warnings/hints. Build and source boundary check pass. No real external video was requested in tests.
