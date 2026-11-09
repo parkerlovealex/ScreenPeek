@@ -40,6 +40,10 @@ test('production Worker generates gated XML sitemaps and production robots while
     expect(await robots.text()).toContain('Disallow: /admin/'); expect(await robots.text()).toContain('Sitemap: https://screenpeek.example.test/sitemap.xml');
     await page.goto(`${worker.base}/movie/${title.slug}/`);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    const filtered = await page.goto(`${worker.base}/movies/filter/?sort=rating`);
+    expect(filtered?.headers()['cache-control']).toContain('private, no-store');
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://screenpeek.example.test/movies/');
     const ungated = (await worker.local.db.query<{ slug: string }>("SELECT slug FROM titles WHERE id=-10002 AND type='movie'"))[0];
     await page.goto(`${worker.base}/movie/${ungated.slug}/`);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);

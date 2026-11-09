@@ -36,6 +36,6 @@ export async function loadHubPage(db: D1Database, kind: HubKind, url: URL, slug?
   return { kind, slug, name, intro, title: `${title}${catalogue.page > 1 && status === 200 ? ` — Page ${catalogue.page}` : ''}`,
     catalogue, sample, failed, status,
     noindex: sample || status !== 200 || catalogue.total === 0,
-    cacheControl: sample || status !== 200 ? 'no-store' : 'public, s-maxage=3600, stale-while-revalidate=604800' };
+    cacheControl: ['genre','year','rating','sort'].some(key => url.searchParams.has(key)) ? 'private, no-store' : sample || status !== 200 ? 'no-store' : 'public, s-maxage=3600, stale-while-revalidate=604800' };
 }
 export type HubPageData = Awaited<ReturnType<typeof loadHubPage>>;

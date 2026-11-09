@@ -29,7 +29,7 @@
 - [ ] 1.26 R2 custom domain + immutable 1-year cache headers; width/height on all images (CLS 0)
   - Code complete; live custom-domain verification deferred to the deployment phase (owner deferred domain purchase; deployment setup is handled separately after Phase 1).
 - [x] 1.27 Detail originality: facts line + Q&A block (+ FAQ schema) + "Updated" date; schema set WITHOUT third-party aggregateRating
-- [ ] 1.28 Filter/sort URL control: noindex + canonical to clean URL
+- [x] 1.28 Filter/sort URL control: noindex + canonical to clean URL (local routes verified; custom-domain edge rule deferred in VERIFICATION.md)
 - [ ] 1.29 Redirects table honoured before render (301); owner-deleted titles → 410; 404s logged to `notfound_log`
 - [ ] 1.30 OG cards: sync composes 1200×630 for gated titles → R2 `og/`; detail OG tags wired
 - [ ] 1.31 Poster colour: sync extracts dominant colour; placeholders + detail tint; scroll-snap swipe rows (Trending, Cast)

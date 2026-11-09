@@ -188,3 +188,9 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 ## 1.27 — detail originality
 
 Stored metadata produces the facts line, three visible Q&A answers, matching FAQPage schema, and a valid Updated date. Missing fields use honest unavailable wording. No third-party aggregateRating or Review markup is added. Typecheck and two SEO tests pass; four detail/originality browser tests pass. First-screen transfer remains below 100 KB: home 46.27, detail 68.88, list 46.28, watch 24.00 KB.
+
+- **1.28 deployment check deferred:** install and verify custom-domain filter-query redirect/X-Robots-Tag rules described in docs/FILTER-URL-RULES.md. Generated dynamic filter routes are locally available; static-root query compatibility requires that domain rule.
+
+## 1.28 — filter URL controls
+
+51 catalogue tests, two SEO tests, six browser checks and typecheck pass. The production-mode fixture verifies filtered pages are noindex, canonical to the clean hub, and private/no-store. Clean pagination/no-JavaScript forms pass. Live custom-domain compatibility for old manually entered static-root query URLs is deferred to deployment; see docs/FILTER-URL-RULES.md.
