@@ -42,6 +42,7 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
     <main id="content">
       {sample && <p class="notice sample-notice"><strong>Sample catalogue</strong> · These titles are synthetic development data. Remove the sample seed before live imports.</p>}
       <slot />
+      <p class="sr-only" data-library-status role="status" aria-live="polite"></p>
     </main>
     <footer class="site-footer">
       <nav aria-label="Information"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/dmca/">DMCA</a><a href="/contact/">Contact</a></nav>
@@ -52,6 +53,7 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
     {pageType !== 'utility' && <AdSlot placement="sticky_320x50" />}
     <script>
       import '../scripts/search';
+      import '../scripts/library';
     </script>
   </body>
 </html>

@@ -3,7 +3,7 @@ import { sampleMode } from './catalogue.ts';
 
 export interface TitleDetail extends TitleCard {
   overview: string | null; original_title: string | null; runtime_min: number | null;
-  status: string | null; original_language: string | null; vote_count: number;
+  status: string | null; original_language: string | null; vote_count: number | null;
   backdrop_r2: string | null; gallery_r2: string; genres: string; similar_ids: string;
   studio: string | null; budget: number | null; revenue: number | null; trailer_key: string | null;
   quality_gate: number; deleted: number; deleted_at: string | null; hidden: number;

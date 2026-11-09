@@ -24,6 +24,7 @@ export async function localBindings(root = '.wrangler/state') {
         },
         env: {
           DB: { type: 'd1', id: '00000000-0000-0000-0000-000000000001' },
+          CONFIG: { type: 'kv', id: '00000000000000000000000000000001' },
           POSTERS: { type: 'r2', name: 'posters' },
         },
       },
@@ -31,9 +32,11 @@ export async function localBindings(root = '.wrangler/state') {
   });
   let database: Awaited<ReturnType<Miniflare['getD1Database']>>;
   let bucket: Awaited<ReturnType<Miniflare['getR2Bucket']>>;
+  let config: Awaited<ReturnType<Miniflare['getKVNamespace']>>;
   try {
     database = await runtime.getD1Database('DB');
     bucket = await runtime.getR2Bucket('POSTERS');
+    config = await runtime.getKVNamespace('CONFIG');
   } catch (error) {
     await runtime.dispose();
     throw error;
@@ -55,7 +58,7 @@ export async function localBindings(root = '.wrangler/state') {
       await bucket.put(key, bytes, { httpMetadata: { contentType, cacheControl } });
     },
   };
-  return { db, database, images, bucket, dispose: () => runtime.dispose() };
+  return { db, database, images, bucket, config, dispose: () => runtime.dispose() };
 }
 
 /** D1 exec splits on newlines; Wrangler's parser preserves multiline SQL/quotes. */

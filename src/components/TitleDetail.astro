@@ -16,6 +16,7 @@ const indexUrl = title?.type === 'tv' ? '/series/' : '/movies/';
 const watchUrl = `/watch/${encodeURIComponent(title?.slug || '')}/`;
 const trailerUrl = `/trailer/${encodeURIComponent(title?.slug || '')}/`;
 const poster = mediaUrl(title?.poster_r2, mediaBase, 500);
+const savedPoster = mediaUrl(title?.poster_r2, mediaBase, 185);
 const color = /^#[a-f\d]{6}$/i.test(title?.poster_color || '') ? title!.poster_color! : '#20202B';
 const pageTitle = available ? `${title!.title}${title!.year ? ` (${title!.year})` : ''} — Cast, Trailer & Where to Watch` :
   data.status === 410 ? 'Title removed' : data.status === 503 ? 'Title unavailable' : 'Title not found';
@@ -40,7 +41,7 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
   sample={data.sample} noindex={data.noindex} pageType={available ? 'detail' : 'utility'}>
   {!available || !title ? <section class="empty-state"><p class="eyebrow">{data.status === 503 ? 'CATALOGUE' : `${data.status} · ${data.status === 410 ? 'REMOVED' : 'NOT FOUND'}`}</p><h1>{errorHeading}</h1>
     <p>{data.status === 503 ? 'Please try again shortly.' : 'Explore the catalogue to find another movie or series.'}</p><a class="button primary" href="/">Go home</a></section> :
-    <article data-title-detail>
+    <article data-title-detail data-title-record data-title-id={title.id} data-title-type={title.type} data-slug={title.slug} data-title={title.title} data-year={title.year ?? ''} data-poster={savedPoster || ''}>
       <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href={indexUrl}>{title.type === 'tv' ? 'Series' : 'Movies'}</a><span aria-hidden="true">/</span><span aria-current="page">{title.title}</span></nav>
       <section class="detail-hero" style={`--poster-color:${color}`} data-detail-section="poster">
         <div class="detail-poster poster-frame">{poster ? <img src={poster} width="500" height="750" alt={`${title.title} poster`} loading="eager" fetchpriority="high" decoding="async" /> :
@@ -49,8 +50,8 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
       </section>
       <RatingStrip score={title.vote_average} count={title.vote_count} external={data.external} />
       <div class="detail-actions" data-detail-section="actions"><a class="button primary" href={watchUrl}>Where to Watch →</a><a class="button" href={trailerUrl}>Trailer</a>
-        <button type="button" disabled data-mylist-toggle data-title-id={title.id} data-title-type={title.type} data-title={title.title} data-year={title.year ?? ''} data-poster={poster || ''} aria-describedby="mylist-preview">+ My List</button></div>
-      <p id="mylist-preview" class="control-preview">My List preview · Saving is not available yet.</p>
+        <button type="button" disabled data-mylist-toggle data-title-id={title.id} data-title-type={title.type} data-slug={title.slug} data-title={title.title} data-year={title.year ?? ''} data-poster={savedPoster || ''} aria-pressed="false">+ My List</button></div>
+      <noscript><p class="control-preview">Enable JavaScript and browser storage to save titles and vote.</p></noscript>
       {providers.length > 0 && <section class="watch-summary" aria-label="Where to Watch summary" data-detail-section="providers"><p>Watch options in {country}: <strong>{providers.slice(0, 3).map(provider => provider.provider_name).join(', ')}</strong>{providers.length > 3 && ` +${providers.length - 3} more`}.</p><a href={watchUrl}>See streaming, rent and buy options →</a><p class="provider-credit">Streaming data by JustWatch.</p></section>}
       <AdSlot placement="top_300x250" />
       <section class="catalogue-section" aria-label="Title information" data-detail-section="information"><dl class="title-facts"><div><dt>Type</dt><dd>{kind}</dd></div><div><dt>Language</dt><dd>{language}</dd></div><div><dt>Release date</dt><dd>{formatDate(title.release_date)}</dd></div><div><dt>{title.type === 'tv' ? 'Network / studio' : 'Studio'}</dt><dd>{title.studio || 'Not listed'}</dd></div>

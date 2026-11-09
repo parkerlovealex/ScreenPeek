@@ -128,3 +128,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 24 passed. A real Worker redirect returns 302 to the configured UK destination and its count reaches D1 after the five-second buffer, within the healthy-service 60-second target. No external redirect was followed.
 - Initial browser run caught an extra trailing-slash 301 and competing test SQLite processes. Internal outbound URLs now use their canonical trailing slash; binding browser tests run with one worker and the complete rerun passes.
 - Typecheck: 111 files, 0 errors/warnings/hints. Build, source boundary check, Actionlint and diff whitespace check pass. Live admin creation/redirect verification remains pending credentials and the admin tasks.
+
+## 1.17 — voting and browser-local lists
+
+- Vote API/native D1+KV tests: 2 passed, covering bounded JSON, method/origin validation, title visibility, typed IDs, deferred aggregate writes, daily duplicate markers, hashed IP/title/day keys and movie/TV separation. 100 same-choice votes aggregate into one statement. KV markers are a basic eventually consistent guard; counts remain explicitly approximate.
+- Production browser suite: 27 passed. Verdict submission reaches real local D1 after buffering, displays percentages, and stays disabled after reload. Direct repeat submission is rejected. My List toggles from cards/detail, survives reload/removal, and keeps viewing history in localStorage only.
+- Stored library text cannot inject HTML or unowned images. Saved-title grids paginate with real URLs at 24 cards; viewing history uses text rows to keep the page at most 24 poster cards. My List is noindex/no-store and contains no ads.
+- A browser test found a nullable TMDb vote-count crash on a sparse valid title; the ratings strip now shows an unavailable state. Complete browser rerun passes.
+- Typecheck: 120 files, 0 errors/warnings/hints. Build, source boundary check, Actionlint and diff whitespace check pass. Native binding regression tests: 3 passed after adding local KV support. No live cloud voting check is claimed.
