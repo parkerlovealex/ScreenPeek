@@ -1,4 +1,5 @@
 ---
+import { titleOriginality } from '../lib/originality';
 import Base from '../layouts/Base.astro';
 import AdSlot from './AdSlot.astro';
 import PosterCard from './PosterCard.astro';
@@ -12,6 +13,7 @@ import { env } from 'cloudflare:workers';
 interface Props { data: TitlePageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { title } = data;
+const originality = titleOriginality(data);
 const available = data.status === 200 && title !== null;
 const kind = title?.type === 'tv' ? 'TV series' : 'Movie';
 const indexUrl = title?.type === 'tv' ? '/series/' : '/movies/';
@@ -51,6 +53,8 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
           <div class="poster-placeholder" role="img" aria-label={`${title.title} poster unavailable`}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 8h4m-4 8h4M17 8h4m-4 8h4"/></svg><span class="placeholder-title">{title.title}</span><span class="placeholder-label">Poster unavailable</span></div>}</div>
         <header class="detail-heading"><p class="eyebrow">{kind.toUpperCase()}</p><h1>{title.title}</h1><ul class="detail-meta"><li>{title.year ?? 'Year TBA'}</li><li>{title.runtime_min ? `${title.runtime_min} min` : 'Runtime unavailable'}</li>{title.status && <li>{title.status}</li>}</ul></header>
       </section>
+      <p class="title-originality">{originality.facts}</p>
+      {originality.updated && <p class="poster-meta">Updated <time datetime={originality.updated}>{formatDate(originality.updated)}</time></p>}
       <RatingStrip score={title.vote_average} count={title.vote_count} external={data.external} />
       <div class="detail-actions" data-detail-section="actions"><a class="button primary" href={watchUrl}>Where to Watch →</a><a class="button" href={trailerUrl}>Trailer</a>
         <button type="button" disabled data-mylist-toggle data-title-id={title.id} data-title-type={title.type} data-slug={title.slug} data-title={title.title} data-year={title.year ?? ''} data-poster={savedPoster || ''} aria-pressed="false">+ My List</button></div>
@@ -69,6 +73,7 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
         })}</div> : <p class="quiet-empty">Cast information is not available yet.</p>}
         {data.cast.length > 0 && <details class="full-credits"><summary>Full cast & crew</summary><ul>{data.cast.map(person => <li><a href={`/cast/${encodeURIComponent(person.slug)}/`}>{person.name}</a><span>{person.role === 'cast' ? person.character || 'Cast' : person.role === 'director' ? 'Director' : 'Creator'}</span></li>)}</ul></details>}
       </section>
+      <section class="catalogue-section" aria-labelledby="questions-title"><h2 id="questions-title">Questions & answers</h2>{originality.questions.map(item => <details><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>
       <VerdictWidget votes={data.votes} titleId={title.id} titleType={title.type} />
       <AdSlot pageType="detail" placement="native" />
       <section class="catalogue-section" aria-labelledby="gallery-title" data-detail-section="gallery"><h2 id="gallery-title">Gallery</h2>{gallery.length > 0 ? <div class="gallery-grid">{gallery.map((image, index) => <img src={image} width="300" height="169" loading="lazy" decoding="async" alt={`${title.title} gallery image ${index + 1}`} />)}</div> : <p class="quiet-empty">No gallery images are available yet.</p>}</section>

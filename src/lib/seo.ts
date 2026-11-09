@@ -1,3 +1,4 @@
+import { titleOriginality } from './originality.ts';
 import { listingBase, paginationLink } from './listing-path.ts';
 import { mediaUrl } from './media.ts';
 import type { TitlePageData } from './detail.ts';
@@ -41,7 +42,7 @@ export function titleSchema(data: TitlePageData, origin: string, mediaBase?: str
     ...(data.genres.length ? { genre: data.genres.map(genre => genre.name) } : {}),
     ...(title.type === 'movie' && title.runtime_min && title.runtime_min > 0 ? { duration: `PT${title.runtime_min}M` } : {}),
     ...(actors.length ? { actor: actors.map(person) } : {}), ...(directors.length ? { director: directors.map(person) } : {}),
-  }, breadcrumbs([{ name: 'Home', path: '/' }, { name: title.type === 'movie' ? 'Movies' : 'Series', path: title.type === 'movie' ? '/movies/' : '/series/' }, { name: title.title, path: titleUrl(title) }], origin)];
+  }, { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: titleOriginality(data).questions.map(item => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) }, breadcrumbs([{ name: 'Home', path: '/' }, { name: title.type === 'movie' ? 'Movies' : 'Series', path: title.type === 'movie' ? '/movies/' : '/series/' }, { name: title.title, path: titleUrl(title) }], origin)];
 }
 export function personSchema(data: PersonPageData, origin: string, mediaBase?: string): Schema[] {
   if (data.status !== 200 || !data.person) return [];

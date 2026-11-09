@@ -184,3 +184,7 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 
 - **1.26:** Code complete; live custom-domain verification deferred to the deployment phase (owner deferred domain purchase; deployment setup is handled separately after Phase 1).
 - Owner chose ScreenPeek.io; no domain has been purchased or connected. Continue local Phase 1 work and append any account/domain/credential-dependent verification here.
+
+## 1.27 — detail originality
+
+Stored metadata produces the facts line, three visible Q&A answers, matching FAQPage schema, and a valid Updated date. Missing fields use honest unavailable wording. No third-party aggregateRating or Review markup is added. Typecheck and two SEO tests pass; four detail/originality browser tests pass. First-screen transfer remains below 100 KB: home 46.27, detail 68.88, list 46.28, watch 24.00 KB.
