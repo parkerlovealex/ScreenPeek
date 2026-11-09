@@ -31,3 +31,7 @@
 .brand{max-width:180px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}@media(max-width:1000px){.brand{max-width:128px}}
 
 .trust-page{max-width:740px;margin:0 auto 48px}.trust-content{font-size:14px;line-height:1.8;overflow-wrap:anywhere}.trust-content h2{font-size:19px;margin:32px 0 12px}.trust-content h3{font-size:16px}.trust-content p,.trust-content li{color:var(--muted)}.trust-content a{color:var(--accent);text-decoration:underline}.trust-content li{margin:8px 0}.trust-content pre{overflow-x:auto;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px}.trust-attribution{margin:32px 0;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:13px;color:var(--muted)}.trust-attribution img{display:block;margin-bottom:16px}.trust-page>.detail-actions{margin-top:24px}
+/* Poster frames reserve their aspect ratio while off-screen painting is skipped. */
+.poster-frame{content-visibility:auto}
+
+img[data-lazy-src]{visibility:hidden}.poster-frame:has(>img[data-lazy-src]){aspect-ratio:185/278}

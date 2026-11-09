@@ -66,6 +66,12 @@ jobs:
         run: npm run test:static
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
+      - name: Verify bloated detail fails the byte-budget gate
+        run: npm run test:performance-gate
+      - name: Gate first-screen own bytes and report Lighthouse mobile
+        run: npm run check:performance
+      - name: Verify image observer and no-JavaScript fallback
+        run: node scripts/tool.mjs node --test tests/image-loading.test.ts
       - name: Production browser tests
         run: npm run test:browser
       - name: Upload browser reports
@@ -76,5 +82,6 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            .cache/performance/
           if-no-files-found: ignore
           retention-days: 14

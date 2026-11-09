@@ -37,7 +37,9 @@
     "deploy:prepare": "node scripts/tool.mjs node scripts/deploy-config.mjs",
     "deploy:dry-run": "node scripts/tool.mjs wrangler deploy --dry-run --config dist/server/wrangler.json --outdir .cache/deploy-dry-run",
     "deploy": "node scripts/tool.mjs node --use-env-proxy scripts/deploy.mjs",
-    "test:static": "node scripts/tool.mjs node --test tests/static.test.ts"
+    "test:static": "node scripts/tool.mjs node --test tests/static.test.ts",
+    "check:performance": "node scripts/tool.mjs node scripts/performance.ts",
+    "test:performance-gate": "node --test tests/performance-gate.test.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
@@ -51,6 +53,7 @@
     "@cloudflare/workers-types": "5.20261109.1",
     "@playwright/test": "1.65.0",
     "@types/node": "24.19.2",
+    "lighthouse": "13.6.0",
     "miniflare": "5.20261104.0-beta",
     "typescript": "5.9.3",
     "wrangler": "4.158.0"
