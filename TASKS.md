@@ -7,7 +7,7 @@
 - [x] 1.4 Sync: changes + discovery collectors, filter, bundled detail fetch, transform + slugs
 - [x] 1.5 Poster pipeline: R2 upload, WebP w185/w500 + profile w185 + backdrop w300 (sharp), idempotent
 - [x] 1.6 Sync: D1 upserts, lookup counts, FTS update, sync_log, Telegram failure alert
-- [ ] 1.7 Workflows: `sync.yml` (daily 08:30 UTC + dispatch), `ci.yml` (typecheck + build)
+- [x] 1.7 Workflows: `sync.yml` (daily 08:30 UTC + dispatch), `ci.yml` (typecheck + build)
 - [ ] 1.8 Home page (sections per design doc) + movies/series lists with filters + pagination
 - [ ] 1.9 Detail pages (movie + TV) with fixed anatomy; ratings strip; verdict widget; gallery
 - [ ] 1.10 TV season + episode pages

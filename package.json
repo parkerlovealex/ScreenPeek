@@ -23,7 +23,9 @@
     "db:migrate": "node scripts/tool.mjs wrangler d1 migrations apply movie-db --local --persist-to .wrangler/state",
     "sync:run": "node scripts/tool.mjs node --use-env-proxy --env-file-if-exists=.env sync/sync.ts",
     "sync:fixture": "npm run sync:run -- --local --fixture",
-    "test:sync-integration": "node scripts/tool.mjs node --test tests/d1.test.ts tests/persist.test.ts tests/sync-log.test.ts tests/notify.test.ts tests/local-bindings.test.ts tests/sync-engine.test.ts tests/seed-migrations.test.ts"
+    "test:sync-integration": "node scripts/tool.mjs node --test tests/d1.test.ts tests/persist.test.ts tests/sync-log.test.ts tests/notify.test.ts tests/local-bindings.test.ts tests/sync-engine.test.ts tests/seed-migrations.test.ts",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",

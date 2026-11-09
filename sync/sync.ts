@@ -48,6 +48,7 @@ try {
     targets: targets.length ? targets : undefined, personIds: personIds.length ? personIds : undefined,
   });
   console.log(JSON.stringify({ local, fixture, ...summary }, null, 2));
+  if (summary.status === 'partial' && process.env.GITHUB_ACTIONS === 'true') console.warn('::warning::Sync completed with partial or deferred work. Review the sync log before treating the catalogue as fully refreshed.');
   if (summary.status === 'failed') process.exitCode = 1;
   // Partial work (for example one missing poster or a capped queue) is retained
   // and may be deployed. Its partial status stays visible in logs and alerts.

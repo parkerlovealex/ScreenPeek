@@ -56,3 +56,12 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Default `npm run db:setup` ran twice successfully; migrated fixture removal preserves unrelated references.
 - Typecheck: 43 files, 0 errors/warnings/hints. Dependency audit: 0 vulnerabilities.
 - Real REST rollback/numeric-null bindings, TMDb authentication, S3 upload and Telegram delivery remain unverified. All external HTTP tests use simulated responses; real data checks await owner credentials.
+
+## 1.7 — CI and daily/manual workflow
+
+- Actionlint 1.7.12: both workflows pass with no findings. Its official release archive was checked against the published SHA-256 checksum before use.
+- Daily workflow is `nightly.yml`, as specified by the pasted Phase 1 prompt; no duplicate `sync.yml` cron is installed. It schedules 08:30 UTC (14:30 in Asia/Dhaka) plus dispatch, and validates targeted IDs without shell evaluation.
+- Remote sync and deployment are independently disabled until the owner sets their explicit repository enable variables. No remote resources or runs were triggered.
+- Clean `npm ci` and current CI command sequence passed locally: typecheck (44 files, 0 errors/warnings/hints), source boundary check, 27 sync tests, 9 image tests, 21 sync integration tests, 1 database test, build, and 2 production browser tests. Total: 60 passing tests, no failures/skips.
+- Negative boundary probe rejected a visitor-side TMDb API URL. Browser tests used installed system Chromium locally; GitHub workflow installs matching managed Chromium.
+- GitHub-hosted CI is **unrun**, not claimed green. Static-tier and speed gates are added at tasks 1.23/1.24; backup belongs to 1.34.
