@@ -18,11 +18,14 @@
     "db:remove-seed": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/remove-seed.sql",
     "test:database": "node --test tests/database.test.mjs",
     "test:tmdb": "node --test tests/tmdb.test.ts",
-    "test:sync": "node --test tests/tmdb.test.ts tests/collectors.test.ts tests/transform.test.ts"
+    "test:sync": "node --test tests/tmdb.test.ts tests/collectors.test.ts tests/transform.test.ts",
+    "test:images": "node --test tests/posters.test.ts tests/r2.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
-    "astro": "7.4.7"
+    "astro": "7.4.7",
+    "aws4fetch": "1.0.20",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",

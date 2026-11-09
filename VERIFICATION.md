@@ -38,3 +38,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Bundled fetches preserve queue-order slug reservation, report 404s without deleting data, reject mismatched IDs, and verify unknown changed-title metadata before admission.
 - Verified stable slugs, collision suffixes, 12 cast members, creators/directors, four-country providers, trailers, release metadata and owned-poster quality gating.
 - Typecheck: 20 files, 0 errors/warnings/hints. All source responses are simulated; no live import or persistence integration has been claimed yet.
+
+## 1.5 — image processing and S3 uploads
+
+- `npm run test:images`: 9 passed, 0 failed/skipped. Sharp produces real WebP bytes at poster widths 185/500, profile 185 and backdrop 300.
+- Verified idempotent HEAD checks, only-missing-variant uploads, changed-path immutable keys, movie/TV ID separation, failure placeholders and immutable cache metadata.
+- R2 transport tests verify AWS4 signatures independently with Node crypto, signed content/cache headers, fixed account host, path encoding, 404 versus permissions failures, and redacted errors. Transport responses are simulated; no real R2 upload occurred.
+- Typecheck: 24 files, 0 errors/warnings/hints. Dependency audit: 0 vulnerabilities after adding Sharp and aws4fetch.
+- Available resources: 32 GiB container memory, 5 CPUs; Sharp uses 2 threads and a 32 MiB cache with input pixel limits. No production custom-domain/cache-header check is claimed.
