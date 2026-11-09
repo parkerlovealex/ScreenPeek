@@ -15,3 +15,11 @@ Results here describe local runs, not GitHub CI or a cloud deployment.
 ## Full Phase 1 verification
 
 Not yet run. Task 1.1 is locally verified; later tasks are not complete. GitHub CI, live TMDb/R2 sync, live redirects/cache purge, and cloud deployment have not been verified.
+
+## 1.2 — local D1 and removable fixtures
+
+- Base schema matches `templates/schema.sql` byte-for-byte; 39 statements applied to actual local D1.
+- Development seed: 50 synthetic titles (30 movies, 20 series), 12 people, 40 seasons, 120 episodes, provider data for US/GB/CA/AU and empty-state examples. Images remain null and quality gate remains 0 until an image exists.
+- `npm run test:database`: 1 integration test passed against isolated actual local D1. Seed twice yields 50 fixtures; FTS finds 50; manual fixture edits survive; removal preserves an unrelated title and its FTS row; reseeding restores fixtures; a reserved-ID collision is rejected before altering existing rows.
+- Production Workers browser tests: 2 passed at 360px. The real bound D1 returns 50 titles to the homepage; the browser sends no external requests.
+- No remote D1 was created, seeded, or accessed. Owner chose local placeholders first.

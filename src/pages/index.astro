@@ -1,12 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
 import AdSlot from '../components/AdSlot.astro';
+import { env } from 'cloudflare:workers';
+import { catalogueCounts } from '../lib/db';
+let counts;
+try { counts = await catalogueCounts(env.DB); } catch { /* Schema not applied yet. */ }
 ---
 <Base title="Discover movies & TV">
   <section class="intro"><p class="eyebrow">MOVIES & TV, EXPLAINED</p>
     <h1>Your next watch starts here.</h1>
     <p>Explore stories, meet the cast, and find legal ways to watch.</p>
-    <p class="notice">Development scaffold. The sample catalogue comes in task 1.2.</p>
+    <p class="notice">Development scaffold.
+      {counts ? `${counts.total} catalogue titles (${counts.movies} movies, ${counts.series} series) available in local D1.` : 'Run npm run db:setup to apply the local schema and sample catalogue.'}
+      Sample data is synthetic and must be removed before live imports.
+    </p>
   </section>
   <AdSlot placement="top_300x250" />
 </Base>

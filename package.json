@@ -11,7 +11,12 @@
     "build": "node scripts/tool.mjs astro build",
     "typecheck": "node scripts/tool.mjs astro check",
     "preview": "node scripts/tool.mjs astro preview --host 0.0.0.0 --ignore-lock",
-    "test:scaffold": "playwright test tests/scaffold.spec.ts"
+    "test:scaffold": "playwright test tests/scaffold.spec.ts",
+    "db:schema": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/schema.sql",
+    "db:seed": "node scripts/seed-local.mjs",
+    "db:setup": "npm run db:schema && npm run db:seed",
+    "db:remove-seed": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/remove-seed.sql",
+    "test:database": "node --test tests/database.test.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",

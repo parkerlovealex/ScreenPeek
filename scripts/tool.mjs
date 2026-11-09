@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { resolve } from 'node:path';
+import { delimiter, resolve } from 'node:path';
 
 // Keep tool state writable in this isolated cloud checkout; retain proxy/CA env.
 const [command, ...args] = process.argv.slice(2);
@@ -8,6 +8,7 @@ const child = spawn(command, args, {
   stdio: 'inherit',
   env: {
     ...process.env,
+    PATH: `${resolve('node_modules/.bin')}${delimiter}${process.env.PATH || ''}`,
     XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME || resolve('.cache/config'),
     ASTRO_TELEMETRY_DISABLED: '1',
     WRANGLER_SEND_METRICS: 'false',
