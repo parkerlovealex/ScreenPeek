@@ -1,0 +1,28 @@
+{
+  "name": "screenpeek",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/tool.mjs astro dev --host 0.0.0.0",
+    "build": "node scripts/tool.mjs astro build",
+    "typecheck": "node scripts/tool.mjs astro check",
+    "preview": "node scripts/tool.mjs wrangler pages dev dist --ip 0.0.0.0",
+    "test:scaffold": "playwright test tests/scaffold.spec.ts"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "12.6.13",
+    "astro": "5.18.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@cloudflare/workers-types": "5.20261109.1",
+    "@playwright/test": "1.65.0",
+    "@types/node": "24.19.2",
+    "typescript": "5.9.3",
+    "wrangler": "4.158.0"
+  }
+}

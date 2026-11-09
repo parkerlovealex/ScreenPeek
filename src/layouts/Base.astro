@@ -1,0 +1,39 @@
+---
+import '../styles/site.css';
+interface Props { title: string; description?: string; }
+const { title, description = 'Discover movies and TV shows, cast, trailers and legal ways to watch.' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0B0B10" />
+    <title>{title} | ScreenPeek</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ScreenPeek home">Screen<span>Peek</span></a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="/movies/">Movies</a><a href="/series/">Series</a>
+        <a href="/top10/">Top 10</a><a href="/upcoming/">Upcoming</a><a href="/mylist/">My List</a>
+      </nav>
+      <form action="/search/" role="search"><label class="sr-only" for="search">Search titles</label>
+        <input id="search" name="q" type="search" placeholder="Search movies & shows" maxlength="100" />
+      </form>
+      <details class="mobile-menu"><summary aria-label="Open navigation">Menu</summary>
+        <nav aria-label="Mobile navigation"><a href="/movies/">Movies</a><a href="/series/">Series</a><a href="/top10/">Top 10</a><a href="/upcoming/">Upcoming</a><a href="/mylist/">My List</a></nav>
+      </details>
+    </header>
+    <main id="content"><slot /></main>
+    <footer class="site-footer">
+      <nav aria-label="Information"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/dmca/">DMCA</a><a href="/contact/">Contact</a></nav>
+      <p><img src="/tmdb.svg" width="48" height="48" alt="TMDB" loading="lazy" decoding="async" />
+        This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      <p>ScreenPeek provides movie and TV information. No videos are hosted here.</p>
+    </footer>
+  </body>
+</html>
