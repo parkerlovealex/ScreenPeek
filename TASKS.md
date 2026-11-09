@@ -19,7 +19,7 @@
 - [x] 1.16 `/go/[slug]` function: KV rules (country/device), batched click log, safe fallbacks
 - [x] 1.17 `/api/vote` + My List/history (localStorage) + `/mylist/`
 - [x] 1.18 Ads: slot resolution from KV, popunder session cap, Social Bar global slot, preview-safe placeholders
-- [ ] 1.19 Admin: Dashboard, Link Manager, Ad Manager, Content (pin/hide), Sync (status + run-now), Settings, Backup export
+- [x] 1.19 Admin: Dashboard, Link Manager, Ad Manager, Content (pin/hide), Sync (status + run-now), Settings, Backup export
 - [ ] 1.20 Trust pages (About with TMDb attribution, Privacy, DMCA, Contact) + styled 404
 - [ ] 1.21 SEO: meta/OG/JSON-LD, dynamic sitemaps, robots.txt, noindex gating
 - [ ] 1.22 Deploy prep: `DEPLOY-CHECKLIST.md`, Cloudflare bindings wired, Phase 1 verification list run + reported

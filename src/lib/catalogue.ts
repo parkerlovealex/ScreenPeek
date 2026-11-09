@@ -76,7 +76,7 @@ export async function homeTitles(db: D1Database, includeUngated = false) {
   const query = async (condition: string, order: string, limit: number) =>
     (await db.prepare(`SELECT ${fields} FROM titles t WHERE ${where} ${condition} ORDER BY ${order},t.id DESC LIMIT ?`).bind(limit).all<TitleCard>()).results;
   const [trending, top10, movies, series, upcoming, genres] = await Promise.all([
-    query('', 't.popularity DESC', 6), query('', 't.popularity DESC', 10),
+    query('', 't.pinned DESC,t.popularity DESC', 6), query('', 't.popularity DESC', 10),
     query("AND t.type='movie'", 't.added_at DESC', 6), query("AND t.type='tv'", 't.added_at DESC', 6),
     query("AND t.release_date>date('now')", 't.release_date ASC', 6),
     db.prepare('SELECT slug,name,title_count FROM genres WHERE title_count>0 ORDER BY title_count DESC,name LIMIT 12').all<{ slug: string; name: string; title_count: number }>(),

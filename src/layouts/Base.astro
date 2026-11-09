@@ -2,12 +2,17 @@
 import '../styles/site.css';
 import AdSlot from '../components/AdSlot.astro';
 import Popunder from '../components/Popunder.astro';
+import { env } from 'cloudflare:workers';
+import { siteConfig } from '../lib/site-config';
+import { mediaUrl } from '../lib/media';
 interface Props {
   title: string; description?: string; noindex?: boolean; sample?: boolean;
   pageType?: 'home' | 'list' | 'detail' | 'cast' | 'watch' | 'trailer' | 'search' | 'utility';
 }
 const { title, description = 'Discover movies and TV shows, cast, trailers and legal ways to watch.',
   noindex = false, sample = false, pageType = 'utility' } = Astro.props;
+const site = await siteConfig(Astro.locals, env);
+const logo = mediaUrl(site.logo, env.R2_PUBLIC_BASE);
 ---
 <!doctype html>
 <html lang="en">
@@ -17,13 +22,13 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0B0B10" />
     {noindex && <meta name="robots" content="noindex,follow" />}
-    <title>{title} | ScreenPeek</title>
+    <title>{title} | {site.name}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body data-page-type={pageType}>
     <a class="skip" href="#content">Skip to content</a>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="ScreenPeek home">Screen<span>Peek</span></a>
+      <a class="brand" href="/" aria-label={`${site.name} home`}>{logo ? <img src={logo} width="128" height="32" alt={site.name} /> : site.name === 'ScreenPeek' ? <>Screen<span>Peek</span></> : site.name}</a>
       <nav class="desktop-nav" aria-label="Main navigation">
         <a href="/movies/">Movies</a><a href="/series/">Series</a>
         <a href="/top10/">Top 10</a><a href="/upcoming/">Upcoming</a><a href="/mylist/">My List</a>
@@ -47,9 +52,11 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
     </main>
     <footer class="site-footer">
       <nav aria-label="Information"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/dmca/">DMCA</a><a href="/contact/">Contact</a></nav>
+      {site.socials.length > 0 && <nav aria-label="Social links">{site.socials.map(link => <a href={`/go/${link.slug}/`} rel="sponsored nofollow noopener" target="_blank" data-no-popunder>{link.name}</a>)}</nav>}
+      {site.tagline && <p>{site.tagline}</p>}
       <p><img src="/tmdb.svg" width="48" height="48" alt="TMDB" loading="lazy" decoding="async" />
         This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
-      <p>ScreenPeek provides movie and TV information. No videos are hosted here.</p>
+      <p>{site.name} provides movie and TV information. No videos are hosted here.</p>
     </footer>
     {pageType !== 'utility' && <><AdSlot pageType={pageType} placement="sticky_320x50" /><AdSlot pageType="global" placement="social_bar" /></>}
     {pageType === 'detail' && <Popunder />}

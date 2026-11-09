@@ -6,6 +6,13 @@ interface ScreenPeekBindings {
   SITE_NAME?: string;
   SITE_URL?: string;
   ADS_ENABLED?: string;
+  CF_ACCESS_TEAM_DOMAIN?: string;
+  CF_ACCESS_AUD?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_ZONE_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+  GITHUB_REPO?: string;
+  GITHUB_ACTIONS_TOKEN?: string;
   R2_PUBLIC_BASE?: string;
   ASSETS: Fetcher;
 }
@@ -18,5 +25,8 @@ declare namespace App {
   interface Locals extends Runtime {
     ads?: ReturnType<typeof import('./lib/ads').createAdResolver>;
     adTestAuthorized?: boolean;
+    admin?: import('./lib/admin/access').AdminIdentity;
+    adminFailure?: { status: number; message: string };
+    siteConfig?: Promise<{ name: string; tagline: string; logo: string | null; socials: Array<{ slug: string; name: string }> }>;
   }
 }

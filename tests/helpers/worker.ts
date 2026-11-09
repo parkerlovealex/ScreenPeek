@@ -1,13 +1,13 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { applyLocalSql, localBindings } from '../../sync/local.ts';
 import { createSeedSql } from '../../db/seed.mjs';
 
 /** Isolated production Worker with actual local bindings and test-only vars. */
-export async function testWorker(vars: Record<string, string>, port = 8790) {
+export async function testWorker(vars: Record<string, string>, port = 8790, outbound: Record<string, { body: unknown; status?: number }> = {}) {
   const state = await mkdtemp(resolve(tmpdir(), 'screenpeek-worker-'));
   const local = await localBindings(state);
   let child: ReturnType<typeof spawn> | undefined;
@@ -19,7 +19,19 @@ export async function testWorker(vars: Record<string, string>, port = 8790) {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     for (const file of (await readdir('db/migrations')).filter(name => name.endsWith('.sql')).sort()) await applyLocalSql(local.database, await readFile(`db/migrations/${file}`, 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    child = spawn(process.execPath, [resolve('node_modules/wrangler/bin/wrangler.js'), 'dev', '--config', 'dist/server/wrangler.json', '--local', '--ip', '127.0.0.1', '--port', String(port), '--persist-to', state,
+    let configPath = 'dist/server/wrangler.json';
+    if (Object.keys(outbound).length) {
+      // Test-only wrapper intercepts external service responses. Authentication
+      // and the production handler are unchanged and must verify real signatures.
+      const original = JSON.parse(await readFile(configPath, 'utf8'));
+      const fixtureRoot = resolve(state, 'worker');
+      await cp('dist/server', fixtureRoot, { recursive: true });
+      const main = resolve(fixtureRoot, 'fixture-entry.mjs');
+      await writeFile(main, `import worker from './${original.main}';\nconst fixtures=${JSON.stringify(outbound)};\nconst originalFetch=globalThis.fetch;\nglobalThis.fetch=(input,init)=>{const key=typeof input==='string'?input:input instanceof URL?input.href:input.url;const fixture=fixtures[key];return fixture?Promise.resolve(new Response(fixture.status===204?null:JSON.stringify(fixture.body),{status:fixture.status||200,headers:{'Content-Type':'application/json'}})):originalFetch(input,init);};\nexport default worker;\n`);
+      configPath = resolve(state, 'worker.json');
+      await writeFile(configPath, JSON.stringify({ ...original, main, assets: { ...original.assets, directory: resolve('dist/server', original.assets.directory) } }));
+    }
+    child = spawn(process.execPath, [resolve('node_modules/wrangler/bin/wrangler.js'), 'dev', '--config', configPath, '--local', '--ip', '127.0.0.1', '--port', String(port), '--persist-to', state,
       ...Object.entries(vars).flatMap(([key, value]) => ['--var', `${key}:${value}`]),
     ], { env: { ...process.env, XDG_CONFIG_HOME: resolve('.cache/config'), WRANGLER_SEND_METRICS: 'false' }, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = '';

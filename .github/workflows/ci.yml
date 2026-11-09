@@ -52,6 +52,8 @@ jobs:
         run: npm run test:votes
       - name: Ad resolution and preview safety tests
         run: npm run test:ads
+      - name: Access, admin permissions and audited transaction tests
+        run: npm run test:admin
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies
