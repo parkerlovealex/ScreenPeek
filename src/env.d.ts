@@ -6,6 +6,7 @@ interface ScreenPeekBindings {
   SITE_NAME?: string;
   SITE_URL?: string;
   ADS_ENABLED?: string;
+  R2_PUBLIC_BASE?: string;
   ASSETS: Fetcher;
 }
 interface Env extends ScreenPeekBindings {}

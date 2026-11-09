@@ -1,7 +1,12 @@
 ---
 import '../styles/site.css';
-interface Props { title: string; description?: string; }
-const { title, description = 'Discover movies and TV shows, cast, trailers and legal ways to watch.' } = Astro.props;
+import AdSlot from '../components/AdSlot.astro';
+interface Props {
+  title: string; description?: string; noindex?: boolean; sample?: boolean;
+  pageType?: 'home' | 'list' | 'detail' | 'cast' | 'watch' | 'trailer' | 'search' | 'utility';
+}
+const { title, description = 'Discover movies and TV shows, cast, trailers and legal ways to watch.',
+  noindex = false, sample = false, pageType = 'utility' } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -10,10 +15,11 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0B0B10" />
+    {noindex && <meta name="robots" content="noindex,follow" />}
     <title>{title} | ScreenPeek</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
-  <body>
+  <body data-page-type={pageType}>
     <a class="skip" href="#content">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="/" aria-label="ScreenPeek home">Screen<span>Peek</span></a>
@@ -28,12 +34,16 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
         <nav aria-label="Mobile navigation"><a href="/movies/">Movies</a><a href="/series/">Series</a><a href="/top10/">Top 10</a><a href="/upcoming/">Upcoming</a><a href="/mylist/">My List</a></nav>
       </details>
     </header>
-    <main id="content"><slot /></main>
+    <main id="content">
+      {sample && <p class="notice sample-notice"><strong>Sample catalogue</strong> · These titles are synthetic development data. Remove the sample seed before live imports.</p>}
+      <slot />
+    </main>
     <footer class="site-footer">
       <nav aria-label="Information"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/dmca/">DMCA</a><a href="/contact/">Contact</a></nav>
       <p><img src="/tmdb.svg" width="48" height="48" alt="TMDB" loading="lazy" decoding="async" />
         This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
       <p>ScreenPeek provides movie and TV information. No videos are hosted here.</p>
     </footer>
+    {pageType !== 'utility' && <AdSlot placement="sticky_320x50" />}
   </body>
 </html>

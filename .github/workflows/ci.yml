@@ -44,6 +44,8 @@ jobs:
         run: npm run test:sync-integration
       - name: Database and removable seed tests
         run: npm run test:database
+      - name: Public catalogue query tests
+        run: npm run test:catalogue
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies

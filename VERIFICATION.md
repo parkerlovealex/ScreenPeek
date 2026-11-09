@@ -65,3 +65,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Clean `npm ci` and current CI command sequence passed locally: typecheck (44 files, 0 errors/warnings/hints), source boundary check, 27 sync tests, 9 image tests, 21 sync integration tests, 1 database test, build, and 2 production browser tests. Total: 60 passing tests, no failures/skips.
 - Negative boundary probe rejected a visitor-side TMDb API URL. Browser tests used installed system Chromium locally; GitHub workflow installs matching managed Chromium.
 - GitHub-hosted CI is **unrun**, not claimed green. Static-tier and speed gates are added at tasks 1.23/1.24; backup belongs to 1.34.
+
+## 1.8 — Home and movie/series catalogues
+
+- Actual D1 catalogue tests: 2 passed, covering 24+6 pagination, filters, sample gating, hidden/deleted/trash exclusion, safe inputs and owned-media URL handling.
+- Production browser tests: 6 passed at 360px. Home/movies/series have no horizontal overflow, at most 24 poster cards, one stylesheet, explicit image dimensions, and no source API/image requests. Filters, numbered links and out-of-range 404 work with JavaScript disabled.
+- Found and fixed an HTTP 200 on the styled out-of-range state: route loaders now set status/cache headers before rendering components. Regression test passes.
+- Typecheck: 55 files, 0 errors/warnings/hints. Build and source boundary check pass. Mobile screenshots inspected; header 56px, catalogue grid 3 columns.
+- CSS output: 10,406 bytes minified, 2,784 bytes gzip. No first-screen or Lighthouse claim yet (task 1.24). Images in browser checks are placeholders; real image pipeline was tested separately.

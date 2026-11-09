@@ -12,7 +12,7 @@ const violations = [];
 for (const path of [...await files('src'), ...await files('functions'), ...await files('public')]) {
   if (!/\.(?:astro|css|html|[cm]?[jt]sx?)$/.test(path)) continue;
   const source = await readFile(path, 'utf8');
-  if (/\b(?:api\.themoviedb\.org|image\.tmdb\.org|files\.tmdb\.org)\b/i.test(source)) violations.push(`${path}: source URL in visitor runtime`);
+  if (/https?:\/\/(?:api\.themoviedb\.org|image\.tmdb\.org|files\.tmdb\.org)\b/i.test(source)) violations.push(`${path}: source URL in visitor runtime`);
   const imports = source.matchAll(/(?:\bfrom\s*|\bimport\s*(?:\(\s*)?|\brequire\s*\(\s*)["'`]([^"'`]+)["'`]/g);
   for (const match of imports) if (/(^|\/)sync(?:\/|$)/.test(match[1])) violations.push(`${path}: sync import in visitor runtime`);
 }

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('the Worker reads the 50-title sample catalogue from its actual local D1 binding', async ({ page }) => {
+test('the Worker renders sample records from its actual local D1 binding without external content calls', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   const externalRequests: string[] = [];
   page.on('request', request => {
@@ -8,7 +8,7 @@ test('the Worker reads the 50-title sample catalogue from its actual local D1 bi
   });
   const response = await page.goto('/');
   expect(response?.status()).toBe(200);
-  await expect(page.locator('.notice')).toContainText('50 catalogue titles (30 movies, 20 series)');
-  await expect(page.locator('.notice')).toContainText('synthetic');
+  await expect(page.locator('[data-poster-card]').first()).toContainText('Sample:');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   expect(externalRequests).toEqual([]);
 });

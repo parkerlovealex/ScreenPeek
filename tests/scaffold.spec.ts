@@ -11,7 +11,8 @@ test('production scaffold: mobile navigation, attribution, one stylesheet and re
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(1);
   await expect(page.locator('script[src]')).toHaveCount(0);
-  await expect(page.locator('.ad-slot')).toHaveCSS('min-height', '250px');
+  await expect(page.locator('.ad-slot[data-placement="top_300x250"]')).toHaveCSS('min-height', '250px');
   await expect(page.locator('footer')).toContainText('not endorsed or certified by TMDB');
-  expect(await page.locator('img[alt="TMDB"]').evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+  await page.locator('img[alt="TMDB"]').scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator('img[alt="TMDB"]').evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 });

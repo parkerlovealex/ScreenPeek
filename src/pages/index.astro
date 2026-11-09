@@ -1,19 +1,46 @@
 ---
 import Base from '../layouts/Base.astro';
 import AdSlot from '../components/AdSlot.astro';
+import PosterCard from '../components/PosterCard.astro';
 import { env } from 'cloudflare:workers';
-import { catalogueCounts } from '../lib/db';
-let counts;
-try { counts = await catalogueCounts(env.DB); } catch { /* Schema not applied yet. */ }
+import { sampleMode, homeTitles, titleUrl } from '../lib/catalogue';
+import { rating } from '../lib/format';
+let sample = false, failed = false;
+let catalogue: Awaited<ReturnType<typeof homeTitles>> = { trending: [], top10: [], movies: [], series: [], upcoming: [], genres: [] };
+try { sample = await sampleMode(env.DB); catalogue = await homeTitles(env.DB, sample); } catch { failed = true; Astro.response.status = 503; }
+Astro.response.headers.set('Cache-Control', sample || failed ? 'no-store' : 'public, s-maxage=3600, stale-while-revalidate=604800');
+const categories = [
+  { href: '/movies/', name: 'Movies', description: 'Stories for a night in', mark: '01' },
+  { href: '/series/', name: 'Series', description: 'Find your next series', mark: '02' },
+  { href: '/new/', name: 'New arrivals', description: 'Fresh in the catalogue', mark: '03' },
+  { href: '/upcoming/', name: 'Upcoming', description: 'What is coming next', mark: '04' },
+];
 ---
-<Base title="Discover movies & TV">
+<Base title="Discover movies & TV" sample={sample} noindex={sample || failed} pageType={failed ? 'utility' : 'home'}>
   <section class="intro"><p class="eyebrow">MOVIES & TV, EXPLAINED</p>
     <h1>Your next watch starts here.</h1>
     <p>Explore stories, meet the cast, and find legal ways to watch.</p>
-    <p class="notice">Development scaffold.
-      {counts ? `${counts.total} catalogue titles (${counts.movies} movies, ${counts.series} series) available in local D1.` : 'Run npm run db:setup to apply the local schema and sample catalogue.'}
-      Sample data is synthetic and must be removed before live imports.
-    </p>
+    <form class="hero-search" action="/search/" role="search" aria-label="Find a movie or series"><label class="sr-only" for="home-search">Find a movie or series</label><input id="home-search" type="search" name="q" placeholder="Find a movie or series" maxlength="100" required /><button class="primary" type="submit">Search</button></form>
   </section>
-  <AdSlot placement="top_300x250" />
+  {failed ? <section class="empty-state"><h2>The catalogue is temporarily unavailable.</h2><p>Please try again shortly.</p></section> : <>
+    <section class="catalogue-section" aria-labelledby="trending-title"><div class="section-heading"><div><p class="eyebrow">IN THE SPOTLIGHT</p><h2 id="trending-title">Trending now</h2></div><a class="section-more" href="/top10/">Top 10 →</a></div>
+      {catalogue.trending.length ? <div class="poster-row">{catalogue.trending.map((title, index) => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} eager={index < 3} />)}</div> : <p class="quiet-empty">New titles will appear after the next catalogue update.</p>}
+    </section>
+    <AdSlot placement="top_300x250" />
+    <section class="catalogue-section" aria-labelledby="top10-title"><div class="section-heading"><div><p class="eyebrow">THE MOST POPULAR</p><h2 id="top10-title">Top 10 this week</h2></div><a class="section-more" href="/top10/">See all →</a></div>
+      {catalogue.top10.length ? <ol class="ranked-list">{catalogue.top10.map((title, index) => <li><a href={titleUrl(title)}><span class="rank-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span class="rank-title"><strong>{title.title}</strong><small>{title.year ?? 'Year TBA'} · {title.type === 'movie' ? 'Movie' : 'TV series'}</small></span><span class="rank-score" title="TMDb rating">{rating(title.vote_average)}</span></a></li>)}</ol> : <p class="quiet-empty">The weekly list is waiting for its first titles.</p>}
+    </section>
+    <section class="catalogue-section" aria-labelledby="movies-title"><div class="section-heading"><h2 id="movies-title">Latest movies</h2><a class="section-more" href="/movies/">All movies →</a></div>
+      {catalogue.movies.length ? <div class="poster-grid">{catalogue.movies.map(title => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} />)}</div> : <p class="quiet-empty">New movies will appear here.</p>}
+    </section>
+    <AdSlot placement="native" />
+    <section class="catalogue-section" aria-labelledby="series-title"><div class="section-heading"><h2 id="series-title">Latest series</h2><a class="section-more" href="/series/">All series →</a></div>
+      {catalogue.series.length ? <div class="poster-grid">{catalogue.series.map(title => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} />)}</div> : <p class="quiet-empty">New series will appear here.</p>}
+    </section>
+    <section class="catalogue-section" aria-labelledby="upcoming-title"><div class="section-heading"><h2 id="upcoming-title">Coming soon</h2><a class="section-more" href="/upcoming/">Upcoming →</a></div>
+      {catalogue.upcoming.length ? <div class="poster-row">{catalogue.upcoming.map(title => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} />)}</div> : <p class="quiet-empty">Upcoming releases will appear after the next catalogue update.</p>}
+    </section>
+    <section class="catalogue-section" aria-labelledby="categories-title"><div class="section-heading"><h2 id="categories-title">Explore the catalogue</h2></div><div class="category-grid">{categories.map(category => <a class="category-tile" href={category.href}><span class="category-number" aria-hidden="true">{category.mark}</span><strong>{category.name}</strong><small>{category.description}</small><span class="category-arrow" aria-hidden="true">↗</span></a>)}</div></section>
+    {catalogue.genres.length > 0 && <section class="catalogue-section" aria-labelledby="genres-title"><div class="section-heading"><h2 id="genres-title">Pick a genre</h2></div><div class="genre-chips">{catalogue.genres.map(genre => <a href={`/genre/${genre.slug}/`}>{genre.name}<span>{genre.title_count}</span></a>)}</div></section>}
+  </>}
 </Base>
