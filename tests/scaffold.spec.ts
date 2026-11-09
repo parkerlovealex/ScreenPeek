@@ -10,7 +10,9 @@ test('production scaffold: mobile navigation, attribution, one stylesheet and re
   await page.locator('summary').click();
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(1);
-  await expect(page.locator('script[src]')).toHaveCount(0);
+  for (const script of await page.locator('script[src]').all()) {
+    expect(new URL((await script.getAttribute('src'))!, page.url()).origin).toBe(new URL(page.url()).origin);
+  }
   await expect(page.locator('.ad-slot[data-placement="top_300x250"]')).toHaveCSS('min-height', '250px');
   await expect(page.locator('footer')).toContainText('not endorsed or certified by TMDB');
   await page.locator('img[alt="TMDB"]').scrollIntoViewIfNeeded();

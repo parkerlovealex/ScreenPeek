@@ -2,6 +2,8 @@
 
 **Owner-approved update (2026-11-09):** hosting is now **Cloudflare Workers with static assets**, replacing Cloudflare Pages/Pages Functions. The owner approved this because maintained Astro adapters have removed Pages support and the legacy Pages stack has critical/high dependency advisories. Astro, TypeScript, D1, KV, R2, GitHub Actions, the static-first model and all numbered HARD RULES remain. Use current Workers deployment commands rather than the original Pages commands below or in the supplied docs. See `docs/DECISIONS.md` for the approved static-save behaviour.
 
+**Owner-approved counter behaviour:** keep best-effort batching and label counters approximate. Durable Objects were declined; do not add them. This supersedes supplied claims that internal click counts are exact; D1 writes remain batched.
+
 Read this first, every session. Full detail lives in `PRD.md` and `docs/`. Build order lives in `TASKS.md`. If any instruction conflicts, this file's HARD RULES win. (This is the Codex edition of the project brain — the rules are identical to the Claude Code edition; only the filename differs, because Codex reads `AGENTS.md` automatically.)
 
 ## What this project is

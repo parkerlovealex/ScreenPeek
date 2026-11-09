@@ -7,3 +7,4 @@
 - Phase 1 enforces server-side roles as AGENTS.md requires; the complete user management interface remains Phase 2.
 - The three named public interactive endpoints do not exclude the expressly required admin handlers, SSR catalogue routes, or dynamic sitemaps. These also consume Functions requests.
 - Watch pages stay SSR to respect visitor country; static title pages use the launch fallback country and link to the localised watch page.
+- Owner selected **best-effort buffered counters**, labelled **approximate**, instead of adding Durable Objects. Keep D1 writes batched. Memory can be lost on isolate shutdown; KV is not an atomic counter. Visibility within 60 seconds is a healthy-service target, not a durability guarantee. Do not claim exact counts or add Durable Objects without a new owner instruction.

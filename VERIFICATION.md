@@ -106,3 +106,10 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 20 passed. Trailer-specific checks confirm zero YouTube requests/iframes before clicking, then an iframe only after the explicit click; its external response is simulated. Missing trailers show no fake player; unknown title returns 404.
 - Loader is 871 source bytes, no third-party thumbnail/preconnect, reserved 16:9 frame, normal YouTube-link fallback without JavaScript. Test key is temporary on an owned negative-ID fixture and restored after the test.
 - Typecheck: 91 files, 0 errors/warnings/hints. Build and source boundary check pass. No real external video was requested in tests.
+
+## 1.14 — search API, suggestions and results
+
+- Actual local D1/API search tests: 9 passed, covering literal-prefix FTS, Unicode, 24+24+2 pagination, filters/sorting, movie/TV ID collisions, visibility/gates, eight-result cap, input/method validation, owned media URLs and failure redaction.
+- Production browser suite: 22 passed. Header suggestions make no initial request, support keyboard selection/Escape, and use only the owned endpoint. Full search filters and pagination work without JavaScript; pages stay noindex/no-store.
+- Typecheck: 99 files, 0 errors/warnings/hints. Build and source boundary check pass. Browser DOM appends use appendChild to avoid a conflicting Worker HTMLRewriter type overload.
+- Counter policy recorded in AGENTS/DECISIONS: owner chose approximate best-effort buffering; no Durable Objects.
