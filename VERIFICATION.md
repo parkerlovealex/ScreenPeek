@@ -80,3 +80,9 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 9 passed, including movie/TV details at 360px, action links, page anatomy, TV seasons, no overflow, one stylesheet, no embeds/external requests, and actual styled unknown-title HTTP 404.
 - Typecheck: 63 files, 0 errors/warnings/hints. Build and source boundary check pass. A ratings type inference issue was caught and fixed with an explicit external-ratings interface.
 - Voting/My List are visibly disabled preview controls until task 1.17; no false functionality or broken submission is claimed. Facts/Q&A/updated-date enhancement remains task 1.27; provider logo strip remains 1.32. No JSON-LD yet (1.21).
+
+## 1.10 — TV seasons and episodes
+
+- Actual local D1 tests: 7 passed, covering ordering/navigation, specials, 24+3 episode pagination, canonical integer paths, parent visibility/410 priority, cache/index policies and explicit query failures.
+- Production browser suite: 10 passed, including series → season → episode at 360px, episode information, previous/next links, no embeds/external content calls, no overflow, one stylesheet and styled unknown-episode HTTP 404.
+- Typecheck: 70 files, 0 errors/warnings/hints. Build and source boundary check pass. Episode route hierarchy is documented.

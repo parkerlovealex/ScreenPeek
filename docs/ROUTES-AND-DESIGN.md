@@ -12,6 +12,7 @@
 | `/movie/<slug>/` | detail | Anatomy below | 24h |
 | `/tv/<slug>/` | detail | Movie anatomy + season list | 24h |
 | `/tv/<slug>/season/<n>/` | list | Episode rows (still, number, name, air date) | 24h |
+| `/tv/<slug>/season/<n>/episode/<episode>/` | episode | Episode overview, air date, owned still, previous/next episode links | 24h |
 | `/cast/<slug>/` | person | Photo, name, bio (truncated + expand), filmography grid (PosterCards with role under title) | 24h |
 | `/genre/<slug>/`, `/collection/<slug>/`, `/language/<slug>/`, `/type/<movie\|tv>/` | list | Themed grids, paginated | 1h |
 | `/on/<provider>/` | list | Titles on that provider in visitor's country (P2) | 1h |
