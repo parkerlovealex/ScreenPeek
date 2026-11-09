@@ -86,3 +86,9 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Actual local D1 tests: 7 passed, covering ordering/navigation, specials, 24+3 episode pagination, canonical integer paths, parent visibility/410 priority, cache/index policies and explicit query failures.
 - Production browser suite: 10 passed, including series → season → episode at 360px, episode information, previous/next links, no embeds/external content calls, no overflow, one stylesheet and styled unknown-episode HTTP 404.
 - Typecheck: 70 files, 0 errors/warnings/hints. Build and source boundary check pass. Episode route hierarchy is documented.
+
+## 1.11 — person pages and filmographies
+
+- Actual local D1 tests: 8 passed, covering roles/deduplication, movie/TV ID collisions, 24+6 pagination, visibility/gating, missing/deleted people, cache/index policies and failures. A final media-type sort key makes ID/popularity ties deterministic.
+- Production browser suite: 11 passed, including title → cast → filmography at 360px, owned-data cards, no overflow/external requests and styled unknown-person HTTP 404.
+- Typecheck: 75 files, 0 errors/warnings/hints. Build and source boundary check pass. Biography uses native expansion; no client script or runtime source request was added.
