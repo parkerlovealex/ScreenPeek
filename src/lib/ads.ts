@@ -32,6 +32,7 @@ export async function readConfig(env: Pick<AdEnvironment, 'DB' | 'CONFIG'>, key:
 /** One resolver per request; no cross-request cache of owner-controlled switches. */
 export function createAdResolver(env: AdEnvironment, authenticatedTest = false) {
   let settings: Promise<{ enabled: boolean; capHours: number }> | undefined;
+  const formats = new Map<string, Promise<string | null>>();
   const slots = new Map<string, Promise<AdRecord | null>>();
   const loadSettings = () => settings ??= (async () => {
     const [master, cap] = await Promise.all([readConfig(env, 'ads_enabled'), readConfig(env, 'popunder_cap_hours')]);
@@ -46,6 +47,10 @@ export function createAdResolver(env: AdEnvironment, authenticatedTest = false) 
       try {
         const config = await loadSettings();
         if (!config.enabled) return null;
+        const format = placement === 'popunder' ? 'popunder' : placement === 'social_bar' ? 'social' : placement === 'sticky_320x50' ? 'sticky' : ['native','infeed'].includes(placement) ? 'native' : 'display';
+        const formatKey = `ads_${format}_enabled`;
+        if (!formats.has(formatKey)) formats.set(formatKey, readConfig(env, formatKey));
+        if (await formats.get(formatKey) === '0') return null;
         const key = adKey(page, placement);
         let result = slots.get(key);
         if (!result) {

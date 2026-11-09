@@ -1,3 +1,4 @@
+import { advancedAction } from './advanced.ts';
 import { AdminError, requirePermission } from './access.ts';
 import type { AdminIdentity, AdminModule } from './access.ts';
 import { commitChange, deliverChange, dispatchSync, savedMessage } from './changes.ts';
@@ -8,6 +9,7 @@ import { httpsDestination } from '../links.ts';
 import { trustSlugs } from '../trust.ts';
 
 export const settingsFields = {
+  ads_display_enabled: 'Display ads', ads_native_enabled: 'Native ads', ads_sticky_enabled: 'Sticky ads', ads_social_enabled: 'Social Bar', ads_popunder_enabled: 'Popunder', ads_txt: 'ads.txt',
   static_top_n: 'Prebuilt top titles', site_name: 'Site name', site_tagline: 'Tagline', ads_enabled: 'Master ads switch', popunder_cap_hours: 'Popunder cap (hours)',
   maintenance: 'Maintenance mode', ratings_external: 'Show cached external ratings', sync_popularity_gate: 'Sync popularity gate', sync_max_titles: 'Max titles per sync',
   social_links: 'Social link slugs (comma-separated)',
@@ -62,6 +64,7 @@ export async function adminForm(request: Request) {
 interface LinkRow extends Record<string, unknown> { slug: string; name: string; destination: string; type: string; enabled: number; rules: string; revision: number; clicks_total: number; }
 export async function applyAdminAction(env: AdminEnvironment, identity: AdminIdentity | undefined, module: AdminModule, form: URLSearchParams, fetcher: typeof fetch = fetch) {
   requirePermission(identity, module, true);
+  if (['seo','changes'].includes(module) || form.get('action') === 'retry-delivery') return { message: await advancedAction(env, identity, module, form, fetcher), jobUrl: undefined };
   if (module === 'sync') {
     if (form.get('action') !== 'run-sync') throw new AdminError('Unknown sync action.');
     const url = await dispatchSync(env, identity, fetcher);
@@ -99,9 +102,9 @@ export async function applyAdminAction(env: AdminEnvironment, identity: AdminIde
   } else if (module === 'settings' || module === 'ads') {
     const key = text(form, 'key') as SettingsKey;
     if (!Object.hasOwn(settingsFields, key)) throw new AdminError('Unknown setting.');
-    if (module === 'ads' && !['ads_enabled', 'popunder_cap_hours'].includes(key)) throw new AdminError('This setting requires the owner’s Settings permission.', 403);
-    const value = text(form, 'value', 250).trim();
-    if (['ads_enabled', 'maintenance', 'ratings_external'].includes(key) && !['0', '1'].includes(value)) throw new AdminError('Use 0 for off or 1 for on.');
+    if (module === 'ads' && !['ads_enabled', 'popunder_cap_hours', 'ads_display_enabled','ads_native_enabled','ads_sticky_enabled','ads_social_enabled','ads_popunder_enabled','ads_txt'].includes(key)) throw new AdminError('This setting requires the owner’s Settings permission.', 403);
+    const value = text(form, 'value', key === 'ads_txt' ? 20000 : 250).trim();
+    if (['ads_enabled', 'maintenance', 'ratings_external','ads_display_enabled','ads_native_enabled','ads_sticky_enabled','ads_social_enabled','ads_popunder_enabled'].includes(key) && !['0', '1'].includes(value)) throw new AdminError('Use 0 for off or 1 for on.');
     if (key === 'popunder_cap_hours' && (!Number.isFinite(Number(value)) || Number(value) < 1 || Number(value) > 168)) throw new AdminError('Use 1–168 hours.');
     if (key === 'sync_popularity_gate' && (!value || !Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100_000)) throw new AdminError('Use a popularity gate from 0 to 100000.');
     if (key === 'static_top_n' && (!/^\d+$/.test(value) || Number(value) > 15000)) throw new AdminError('Use 0–15000; the total asset cap still applies.');

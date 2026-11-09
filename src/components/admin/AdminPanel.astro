@@ -1,4 +1,5 @@
 ---
+import AdminAdvanced from './AdminAdvanced.astro';
 import Base from '../../layouts/Base.astro';
 import { permitted } from '../../lib/admin/access';
 import type { AdminIdentity, AdminModule } from '../../lib/admin/access';
@@ -7,7 +8,7 @@ import { adMap } from '../../lib/ads';
 import { dhakaInput, settingsFields } from '../../lib/admin/actions';
 interface Props { module: AdminModule; actor?: AdminIdentity; data?: AdminData; error?: string; message?: string; jobUrl?: string; platformAds?: boolean; secrets?: Array<{ name: string; set: boolean }>; submitted?: URLSearchParams; }
 const { module, actor, data, error, message, jobUrl, platformAds = false, secrets = [], submitted } = Astro.props;
-const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', pages: 'Pages', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export' } as const;
+const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', pages: 'Pages', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export', seo: 'SEO Center', changes: 'Change Log' } as const;
 const heading = modules[module as keyof typeof modules] || 'Admin';
 const canWrite = actor && permitted(actor, module, true);
 const link = data?.selectedLink;
@@ -24,6 +25,7 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
   {error && <p class="notice admin-error" role="alert">{error}</p>}
   {message && <p class="notice" role="status">{message}{jobUrl && <> <a href={jobUrl} rel="noreferrer">Check the workflow →</a></>}</p>}
   {actor && data && <>
+    {['dashboard','seo','changes'].includes(module) && <AdminAdvanced module={module} actor={actor} />}
     {module === 'dashboard' && <>
       <div class="admin-meters"><section><h2>Catalogue</h2><p><strong>{data.catalogue?.titles.toLocaleString() || 0}</strong> titles · {data.catalogue?.gated.toLocaleString() || 0} index-ready</p><p>{data.catalogue?.people.toLocaleString() || 0} people</p></section><section><h2>Approx. clicks today</h2><p class="admin-big">≈ {data.catalogue?.clicks.toLocaleString() || 0}</p><small>UTC reporting day · best-effort totals</small></section><section><h2>Last sync</h2><p>{data.sync[0]?.status || 'No sync recorded'}</p>{data.sync[0] && <small>{date(data.sync[0].started_at)} · Bangladesh time</small>}</section><section><h2>Delivery health</h2><p>{data.pending ? `${data.pending} changes await propagation or purge.` : 'No pending delivery records.'}</p><a href="https://dash.cloudflare.com/" rel="noreferrer">Check Cloudflare quotas →</a><p>Quota and revenue numbers are not connected.</p></section></div>
       <section class="catalogue-section"><h2>Last 20 changes</h2>{data.changes.length ? <div class="admin-table"><table><thead><tr><th>When (Bangladesh)</th><th>Actor</th><th>Change</th></tr></thead><tbody>{data.changes.map(row => <tr><td>{date(row.ts)}</td><td>{row.actor || 'Not recorded'}</td><td>{row.entity} · {row.entity_id}</td></tr>)}</tbody></table></div> : <p class="quiet-empty">No admin changes yet.</p>}</section>
@@ -47,7 +49,7 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
     </>}
     {module === 'ads' && <>
       <p class="notice">{platformAds ? 'Platform ads flag is on. The master switch and individual slot switches still apply.' : 'This deployment forces ad placeholders. Saved codes cannot run until its platform ADS_ENABLED flag is enabled.'}</p>
-      <div class="admin-settings">{(['ads_enabled', 'popunder_cap_hours'] as const).map(key => <form class="admin-form" method="post"><input type="hidden" name="key" value={key} /><input type="hidden" name="revision" value={settingValue(key)?.revision ?? -1} /><fieldset disabled={!canWrite}><label>{settingsFields[key]}<input name="value" value={settingValue(key)?.value || (key === 'ads_enabled' ? '0' : '24')} /></label><small>{key === 'ads_enabled' ? '0 = off · 1 = on. The platform flag must also be on.' : '1–168 hours; default 24.'}</small><button type="submit">Save {settingsFields[key].toLowerCase()}</button></fieldset></form>)}</div>
+      <div class="admin-settings">{(['ads_enabled', 'popunder_cap_hours','ads_display_enabled','ads_native_enabled','ads_sticky_enabled','ads_social_enabled','ads_popunder_enabled','ads_txt'] as const).map(key => <form class="admin-form" method="post"><input type="hidden" name="key" value={key} /><input type="hidden" name="revision" value={settingValue(key)?.revision ?? -1} /><fieldset disabled={!canWrite}><label>{settingsFields[key]}{key === 'ads_txt' ? <textarea name="value" rows="8" maxlength="20000">{settingValue(key)?.value || ''}</textarea> : <input name="value" value={settingValue(key)?.value ?? (key === 'popunder_cap_hours' ? '24' : key === 'ads_enabled' ? '0' : '1')} />}</label><small>{key === 'popunder_cap_hours' ? '1–168 hours; default 24.' : key === 'ads_txt' ? 'Plain text. Served at /ads.txt.' : '0 = off · 1 = on. Platform and master switches also apply.'}</small><button type="submit">Save {settingsFields[key].toLowerCase()}</button></fieldset></form>)}</div>
       <p>Use a separate placement code for each card. Test-mode codes require a verified admin preview with <code>?adtest=1</code>.</p>
       <div class="admin-slot-board">{Object.entries(adMap).flatMap(([page, placements]) => placements.map(placement => {
         const row = data.slots.find(slot => slot.page_type === page && slot.placement === placement);

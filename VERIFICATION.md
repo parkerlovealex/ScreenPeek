@@ -182,6 +182,9 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 
 ## Deferred deployment verification
 
+- **1.30:** verify generated OG cards through the real R2 hostname and social crawlers.
+- **1.33:** verify Cloudflare purge/analytics and Search Console on the real account/domain; local purge transport is mocked, usage is explicitly unavailable with dashboard links.
+
 - **1.26:** Code complete; live custom-domain verification deferred to the deployment phase (owner deferred domain purchase; deployment setup is handled separately after Phase 1).
 - Owner chose ScreenPeek.io; no domain has been purchased or connected. Continue local Phase 1 work and append any account/domain/credential-dependent verification here.
 
@@ -210,3 +213,7 @@ Eleven image tests and 21 sync integration tests pass; the importer explicitly v
 ## 1.32 — streaming provider strip
 
 One actual-Worker browser test verifies provider deduplication, the first three streaming providers, +N more, Watch-only links and country isolation. Provider logos have dimensions and lazy loading; text remains available for missing logos. Rental-only offers are not labelled as streaming. JustWatch credit remains visible. Build/typecheck pass.
+
+## 1.33 — admin safety and SEO controls
+
+Four native admin tests and two ad tests pass. Browser regression plus new v2 flow pass: exact ad Undo, stale/role rejection, KV propagation, mocked purge, duplicate warning, Dashboard retry, SEO-created 301 and rendered verification meta. Content Undo restores lookup counts. Five per-format toggles and plain-text ads.txt editing are added behind the master/platform switches. History is actor-stamped and searchable by actor/entity; quota cards show unavailable rather than invented values, with Cloudflare/Search Console/CI links. Typecheck/build/boundary/actionlint pass. Remaining universal editing powers and tools are verified in their later numbered tasks.

@@ -31,6 +31,8 @@ if (pageType !== 'utility' && Astro.url.pathname !== '/' && !structured.some(sch
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={summary} />
+    {site.google && <meta name="google-site-verification" content={site.google} />}
+    {site.bing && <meta name="msvalidate.01" content={site.bing} />}
     <meta name="theme-color" content="#0B0B10" />
     {indexBlocked && <meta name="robots" content="noindex,follow" />}
     <title>{fullTitle}</title>

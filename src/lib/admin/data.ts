@@ -26,7 +26,7 @@ export async function adminData(env: AdminEnvironment, actor: AdminIdentity, mod
     if (url.searchParams.has('edit')) selectedLink = await db.prepare('SELECT * FROM links WHERE slug=?').bind((url.searchParams.get('edit') || '').slice(0, 120)).first<AdminLink>();
   } else if (module === 'ads') {
     slots = (await db.prepare('SELECT * FROM ad_slots ORDER BY page_type,placement').all<AdminAd>()).results;
-    settings = (await db.prepare("SELECT key,value,revision FROM config WHERE key IN ('ads_enabled','popunder_cap_hours')").all<SettingRow>()).results;
+    settings = (await db.prepare("SELECT key,value,revision FROM config WHERE key IN ('ads_enabled','popunder_cap_hours','ads_display_enabled','ads_native_enabled','ads_sticky_enabled','ads_social_enabled','ads_popunder_enabled','ads_txt')").all<SettingRow>()).results;
   }
   else if (module === 'content') {
     const where = "deleted=0 AND deleted_at IS NULL AND title LIKE ? ESCAPE '\\'";
