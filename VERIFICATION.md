@@ -113,3 +113,10 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 22 passed. Header suggestions make no initial request, support keyboard selection/Escape, and use only the owned endpoint. Full search filters and pagination work without JavaScript; pages stay noindex/no-store.
 - Typecheck: 99 files, 0 errors/warnings/hints. Build and source boundary check pass. Browser DOM appends use appendChild to avoid a conflicting Worker HTMLRewriter type overload.
 - Counter policy recorded in AGENTS/DECISIONS: owner chose approximate best-effort buffering; no Durable Objects.
+
+## 1.15 — localised watch information
+
+- D1/geo/link checks: 2 passed, covering country selection/fallback, country-specific providers, availability countries, configured-only go links, safe HTTPS destinations and schedules, and disabled KV records.
+- Production browser suite: 23 passed, including UK/US provider groups at 360px, JustWatch credit, country switching, no popunder slot, no overflow and unknown-title 404.
+- Typecheck: 106 files, 0 errors/warnings/hints. Build and source boundary check pass.
+- Empty destinations remain information-only provider rows; no hard-coded provider URLs or fake outbound buttons. Watch responses are currently private/no-store to avoid cross-country cache sharing; country-keyed edge caching is part of 1.23.
