@@ -26,7 +26,7 @@
     "test:sync-integration": "node scripts/tool.mjs node --test tests/d1.test.ts tests/persist.test.ts tests/sync-log.test.ts tests/notify.test.ts tests/local-bindings.test.ts tests/sync-engine.test.ts tests/seed-migrations.test.ts",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "test:browser": "playwright test",
-    "test:catalogue": "node scripts/tool.mjs node --test tests/catalogue.test.ts"
+    "test:catalogue": "node scripts/tool.mjs node --test tests/catalogue.test.ts tests/detail.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",

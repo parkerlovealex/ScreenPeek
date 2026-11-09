@@ -73,3 +73,10 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Found and fixed an HTTP 200 on the styled out-of-range state: route loaders now set status/cache headers before rendering components. Regression test passes.
 - Typecheck: 55 files, 0 errors/warnings/hints. Build and source boundary check pass. Mobile screenshots inspected; header 56px, catalogue grid 3 columns.
 - CSS output: 10,406 bytes minified, 2,784 bytes gzip. No first-screen or Lighthouse claim yet (task 1.24). Images in browser checks are placeholders; real image pipeline was tested separately.
+
+## 1.9 — movie and TV detail pages
+
+- Detail D1 tests: 9 passed, covering relationships, country fallback, cached external ratings flag, malformed JSON, similar-title gating, visibility/404/410 precedence and explicit 503 failures.
+- Production browser suite: 9 passed, including movie/TV details at 360px, action links, page anatomy, TV seasons, no overflow, one stylesheet, no embeds/external requests, and actual styled unknown-title HTTP 404.
+- Typecheck: 63 files, 0 errors/warnings/hints. Build and source boundary check pass. A ratings type inference issue was caught and fixed with an explicit external-ratings interface.
+- Voting/My List are visibly disabled preview controls until task 1.17; no false functionality or broken submission is claimed. Facts/Q&A/updated-date enhancement remains task 1.27; provider logo strip remains 1.32. No JSON-LD yet (1.21).

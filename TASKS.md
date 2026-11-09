@@ -9,7 +9,7 @@
 - [x] 1.6 Sync: D1 upserts, lookup counts, FTS update, sync_log, Telegram failure alert
 - [x] 1.7 Workflows: `sync.yml` (daily 08:30 UTC + dispatch), `ci.yml` (typecheck + build)
 - [x] 1.8 Home page (sections per design doc) + movies/series lists with filters + pagination
-- [ ] 1.9 Detail pages (movie + TV) with fixed anatomy; ratings strip; verdict widget; gallery
+- [x] 1.9 Detail pages (movie + TV) with fixed anatomy; ratings strip; verdict widget; gallery
 - [ ] 1.10 TV season + episode pages
 - [ ] 1.11 Cast/person pages with filmography
 - [ ] 1.12 Genre / collection / language grids; `/new/`, `/top10/`, `/upcoming/`
