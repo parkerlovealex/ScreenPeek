@@ -58,6 +58,8 @@ jobs:
         run: npm run test:trust
       - name: SEO, sitemap gates and pagination tests
         run: npm run test:seo
+      - name: Production binding and deployment guard tests
+        run: npm run test:deploy
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies

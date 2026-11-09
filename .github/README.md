@@ -31,17 +31,17 @@ accounts, databases, namespaces, buckets, or paid resources.
 
 Before enabling remote sync, the owner must:
 
-1. Create the approved Cloudflare resources and replace the local placeholder
-   binding IDs in `wrangler.toml`; apply the schema and migrations remotely.
+1. Create the approved Cloudflare resources and supply their IDs in environment
+   settings; prepare the generated production configuration and apply the schema/migrations remotely.
    Use a remote database without the development seed.
 2. Configure the repository Actions secrets securely:
    - `TMDB_READ_TOKEN` (preferred), or `TMDB_API_KEY`.
-   - `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `D1_DATABASE_ID`.
+   - `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `D1_DATABASE_ID`, `KV_NAMESPACE_ID`.
    - `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
    - Optional failure alerts: `TELEGRAM_BOT_TOKEN`, `OWNER_CHAT_ID`.
    - `CLOUDFLARE_ZONE_ID` is passed through for later cache-purge wiring.
-3. Set the repository Actions variables `R2_BUCKET` (defaults to `posters`) and
-   `SITE_URL` to the actual bucket and public site URL. `TMDB_BASE_URL` is optional;
+3. Set the repository Actions variables `R2_BUCKET` (defaults to `posters`),
+   `R2_PUBLIC_BASE` (owned custom image domain), and `SITE_URL` to the actual resources. `TMDB_BASE_URL` is optional;
    leave it absent to use the documented source default.
 4. Set `SCREENPEEK_SYNC_ENABLED=1` and manually dispatch the workflow with
    **deploy unchecked** to verify the real import and image storage first.
@@ -58,8 +58,10 @@ of the same job so it uses that exact generated output. It runs only when
 still changes D1/R2 when deployment is unchecked.
 
 Deployment uses the approved **Workers with static assets** target. `astro build`
-writes `.wrangler/deploy/config.json`, directing `wrangler deploy` to
-`dist/server/wrangler.json`; it does not use the obsolete Pages deployment command.
+writes `.wrangler/deploy/config.json`. The guarded `npm run deploy` prepares
+`dist/server/wrangler.json` from real binding IDs/public settings, selects production
+indexing, preserves platform variables and encrypted secrets, and refuses incomplete
+Phase 1 checklists. It does not use the obsolete Pages deployment command.
 The token must have the minimum permissions for the configured remote operations;
 deployment additionally needs Workers script deployment access. Do not enable a
 paid plan or provide credentials in source files or workflow input text.

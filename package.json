@@ -32,7 +32,11 @@
     "test:ads": "node scripts/tool.mjs node --test tests/ads.test.ts",
     "test:admin": "node scripts/tool.mjs node --test tests/admin.test.ts",
     "test:trust": "node scripts/tool.mjs node --test tests/trust.test.ts",
-    "test:seo": "node scripts/tool.mjs node --test tests/seo.test.ts"
+    "test:seo": "node scripts/tool.mjs node --test tests/seo.test.ts",
+    "test:deploy": "node --test tests/deploy.test.mjs",
+    "deploy:prepare": "node scripts/tool.mjs node scripts/deploy-config.mjs",
+    "deploy:dry-run": "node scripts/tool.mjs wrangler deploy --dry-run --config dist/server/wrangler.json --outdir .cache/deploy-dry-run",
+    "deploy": "node scripts/tool.mjs node scripts/deploy.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",

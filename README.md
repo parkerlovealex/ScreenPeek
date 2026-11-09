@@ -24,3 +24,9 @@ credentials in ignored `.env` / `.dev.vars` files or platform settings, never Gi
 The owner approved Workers hosting in place of Pages so current patched Astro
 packages can be used. See `VERIFICATION.md` and `docs/DECISIONS.md`.
 Nothing has been deployed or pushed.
+
+Deployment preparation and owner-only account steps are in
+[`DEPLOY-CHECKLIST.md`](DEPLOY-CHECKLIST.md). `npm run deploy:dry-run` is offline;
+`npm run deploy` is guarded and remains disabled until Phase 1 is complete and
+the owner explicitly enables deployment. Production binding preparation never
+embeds credentials into the generated configuration.
