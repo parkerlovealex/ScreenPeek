@@ -206,3 +206,7 @@ Ten image tests and all 21 sync integration tests pass. The importer creates own
 ## 1.31 — dominant poster colour and swipe rows
 
 Eleven image tests and 21 sync integration tests pass; the importer explicitly verifies all 50 fixture titles have safe hex colours and reruns do not redownload unchanged imagery. Extraction reads owned poster bytes, observes current field locks at persistence, and refreshes only changed/missing colours. A browser test confirms detail tint, horizontal snapping on Trending/Cast and no mobile overflow. Build/typecheck pass.
+
+## 1.32 — streaming provider strip
+
+One actual-Worker browser test verifies provider deduplication, the first three streaming providers, +N more, Watch-only links and country isolation. Provider logos have dimensions and lazy loading; text remains available for missing logos. Rental-only offers are not labelled as streaming. JustWatch credit remains visible. Build/typecheck pass.

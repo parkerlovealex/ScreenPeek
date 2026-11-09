@@ -36,6 +36,7 @@ const overview = title?.overview?.trim() || '';
 const cutoff = overview.length > 480 ? Math.max(overview.lastIndexOf(' ', 480), 350) : overview.length;
 const cast = data.cast.filter(person => person.role === 'cast').slice(0, 12);
 const providers = [...new Map(data.providers.map(provider => [provider.provider_id, provider])).values()];
+const streamers = [...new Map(data.providers.filter(provider => ['stream', 'free', 'ads'].includes(provider.offer_type)).map(provider => [provider.provider_id, provider])).values()];
 const countries: Record<string, string> = { US: 'the United States', GB: 'the United Kingdom', CA: 'Canada', AU: 'Australia' };
 const country = countries[data.country] || data.country;
 const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof key === 'string')
@@ -59,7 +60,10 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
       <div class="detail-actions" data-detail-section="actions"><a class="button primary" href={watchUrl}>Where to Watch →</a><a class="button" href={trailerUrl}>Trailer</a>
         <button type="button" disabled data-mylist-toggle data-title-id={title.id} data-title-type={title.type} data-slug={title.slug} data-title={title.title} data-year={title.year ?? ''} data-poster={savedPoster || ''} aria-pressed="false">+ My List</button></div>
       <noscript><p class="control-preview">Enable JavaScript and browser storage to save titles and vote.</p></noscript>
-      {providers.length > 0 && <section class="watch-summary" aria-label="Where to Watch summary" data-detail-section="providers"><p>Watch options in {country}: <strong>{providers.slice(0, 3).map(provider => provider.provider_name).join(', ')}</strong>{providers.length > 3 && ` +${providers.length - 3} more`}.</p><a href={watchUrl}>See streaming, rent and buy options →</a><p class="provider-credit">Streaming data by JustWatch.</p></section>}
+      {providers.length > 0 && <section class="watch-summary" aria-label="Where to Watch summary" data-detail-section="providers"><p>Watch options in {country}: <strong>{providers.slice(0, 3).map(provider => provider.provider_name).join(', ')}</strong>{providers.length > 3 && ` +${providers.length - 3} more`}.</p><div class="streaming-strip" aria-label="Streaming on">{streamers.length > 0 && <span>Streaming on</span>}{streamers.slice(0, 3).map(provider => {
+          const logo = mediaUrl(provider.logo_r2, mediaBase, 185);
+          return <a href={watchUrl} data-no-popunder>{logo && <img src={logo} width="28" height="28" loading="lazy" decoding="async" alt="" />}<span>{provider.provider_name}</span></a>;
+        })}{streamers.length > 3 && <a href={watchUrl} data-no-popunder>+{streamers.length - 3} more</a>}</div><a href={watchUrl} data-no-popunder>See streaming, rent and buy options →</a><p class="provider-credit">Streaming data by JustWatch.</p></section>}
       <AdSlot pageType="detail" placement="top_300x250" />
       <section class="catalogue-section" aria-label="Title information" data-detail-section="information"><dl class="title-facts"><div><dt>Type</dt><dd>{kind}</dd></div><div><dt>Language</dt><dd>{language}</dd></div><div><dt>Release date</dt><dd>{formatDate(title.release_date)}</dd></div><div><dt>{title.type === 'tv' ? 'Network / studio' : 'Studio'}</dt><dd>{title.studio || 'Not listed'}</dd></div>
         {title.type === 'movie' && title.budget !== null && title.budget > 0 && <div><dt>Budget (USD)</dt><dd>{currency(title.budget)}</dd></div>}{title.type === 'movie' && title.revenue !== null && title.revenue > 0 && <div><dt>Revenue (USD)</dt><dd>{currency(title.revenue)}</dd></div>}</dl>
