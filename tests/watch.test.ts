@@ -38,7 +38,7 @@ test('watch data groups owned provider metadata by country and emits only config
     assert.ok(unconfigured.providers.every(provider => provider.country === 'GB' && provider.href === null));
     await local.db.batch([{ sql: "INSERT INTO links(slug,name,destination,type) VALUES('prov-sample-30002','Sample provider','https://provider.example.test','affiliate')" }]);
     const configured = await loadWatchPage(db, empty, title.slug, request);
-    assert.equal(configured.providers[0].href, '/go/prov-sample-30002');
+    assert.equal(configured.providers[0].href, '/go/prov-sample-30002/');
     assert.equal(configured.providers[0].offer_type, 'rent');
     assert.equal(configured.cacheControl, 'private, no-store');
     assert.equal(configured.availableCountries.length, 4);

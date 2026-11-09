@@ -46,6 +46,8 @@ jobs:
         run: npm run test:database
       - name: Public catalogue query tests
         run: npm run test:catalogue
+      - name: Redirect and approximate counter tests
+        run: npm run test:redirects
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies

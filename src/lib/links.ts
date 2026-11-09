@@ -20,3 +20,17 @@ export async function readLink(kv: KVNamespace, db: D1Database, slug: string): P
   return db.prepare('SELECT slug,name,destination,type,enabled,rules,starts_at,ends_at FROM links WHERE slug=?').bind(slug).first<ManagedLink>();
 }
 export const providerLinkSlug = (id: number) => id < 0 ? `prov-sample-${Math.abs(id)}` : `prov-${id}`;
+
+export function resolveDestination(link: ManagedLink, country: string, device: 'mobile' | 'desktop', now = new Date()) {
+  if (!linkActive(link, now)) return null;
+  let rules: Record<string, unknown> = {};
+  try {
+    const value: unknown = typeof link.rules === 'string' ? JSON.parse(link.rules) : link.rules;
+    if (value && typeof value === 'object' && !Array.isArray(value)) rules = value as Record<string, unknown>;
+  } catch { /* Malformed rules fall back to the validated default. */ }
+  const mapping = (value: unknown, key: string) => value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, key) ? (value as Record<string, unknown>)[key] : undefined;
+  for (const candidate of [mapping(rules.byCountry, country), mapping(rules.byDevice, device), link.destination]) {
+    if (httpsDestination(candidate)) return new URL(candidate).href;
+  }
+  return null;
+}

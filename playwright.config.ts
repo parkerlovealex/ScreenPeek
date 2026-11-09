@@ -5,6 +5,8 @@ export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.spec.ts',
   fullyParallel: false,
+  // Binding integration tests share Wrangler's SQLite files with preview.
+  workers: 1,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://127.0.0.1:8788',

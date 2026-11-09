@@ -120,3 +120,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Production browser suite: 23 passed, including UK/US provider groups at 360px, JustWatch credit, country switching, no popunder slot, no overflow and unknown-title 404.
 - Typecheck: 106 files, 0 errors/warnings/hints. Build and source boundary check pass.
 - Empty destinations remain information-only provider rows; no hard-coded provider URLs or fake outbound buttons. Watch responses are currently private/no-store to avoid cross-country cache sharing; country-keyed edge caching is part of 1.23.
+
+## 1.16 — managed redirects and approximate click counts
+
+- Redirect/data tests: 2 passed; watch regression tests: 2 passed. Verified country → device → default precedence, ignored Phase 2 splits, disabled/scheduled/unsafe destinations, no arbitrary URL parameter, prefetch suppression, safe home fallback and redirects surviving logging failure.
+- Actual D1 proves 100 same-group events become one buffered group and two batched statements; no synchronous write per redirect. Flushes leave query-budget headroom. Counts are best effort and approximate as approved by the owner.
+- Production browser suite: 24 passed. A real Worker redirect returns 302 to the configured UK destination and its count reaches D1 after the five-second buffer, within the healthy-service 60-second target. No external redirect was followed.
+- Initial browser run caught an extra trailing-slash 301 and competing test SQLite processes. Internal outbound URLs now use their canonical trailing slash; binding browser tests run with one worker and the complete rerun passes.
+- Typecheck: 111 files, 0 errors/warnings/hints. Build, source boundary check, Actionlint and diff whitespace check pass. Live admin creation/redirect verification remains pending credentials and the admin tasks.

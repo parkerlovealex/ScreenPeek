@@ -21,7 +21,7 @@ export async function loadWatchPage(db: D1Database, kv: KVNamespace, slug: strin
         if (!cache.has(provider.provider_id)) {
           const key = providerLinkSlug(provider.provider_id);
           const link = await readLink(kv, db, key);
-          cache.set(provider.provider_id, link && linkActive(link) ? `/go/${key}` : null);
+          cache.set(provider.provider_id, link && linkActive(link) ? `/go/${key}/` : null);
         }
         providers.push({ ...provider, href: cache.get(provider.provider_id) || null });
       }
