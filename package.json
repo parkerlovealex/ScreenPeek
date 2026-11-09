@@ -13,13 +13,17 @@
     "preview": "node scripts/tool.mjs astro preview --host 0.0.0.0 --ignore-lock",
     "test:scaffold": "playwright test tests/scaffold.spec.ts",
     "db:schema": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/schema.sql",
-    "db:seed": "node scripts/seed-local.mjs",
-    "db:setup": "npm run db:schema && npm run db:seed",
-    "db:remove-seed": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/remove-seed.sql",
+    "db:seed": "node scripts/tool.mjs node scripts/seed-local.mjs",
+    "db:setup": "npm run db:schema && npm run db:migrate && npm run db:seed",
+    "db:remove-seed": "node scripts/tool.mjs node scripts/remove-seed.mjs",
     "test:database": "node --test tests/database.test.mjs",
     "test:tmdb": "node --test tests/tmdb.test.ts",
     "test:sync": "node --test tests/tmdb.test.ts tests/collectors.test.ts tests/transform.test.ts",
-    "test:images": "node --test tests/posters.test.ts tests/r2.test.ts"
+    "test:images": "node --test tests/posters.test.ts tests/r2.test.ts",
+    "db:migrate": "node scripts/tool.mjs wrangler d1 migrations apply movie-db --local --persist-to .wrangler/state",
+    "sync:run": "node scripts/tool.mjs node --use-env-proxy --env-file-if-exists=.env sync/sync.ts",
+    "sync:fixture": "npm run sync:run -- --local --fixture",
+    "test:sync-integration": "node scripts/tool.mjs node --test tests/d1.test.ts tests/persist.test.ts tests/sync-log.test.ts tests/notify.test.ts tests/local-bindings.test.ts tests/sync-engine.test.ts tests/seed-migrations.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
@@ -32,6 +36,7 @@
     "@cloudflare/workers-types": "5.20261109.1",
     "@playwright/test": "1.65.0",
     "@types/node": "24.19.2",
+    "miniflare": "5.20261104.0-beta",
     "typescript": "5.9.3",
     "wrangler": "4.158.0"
   }

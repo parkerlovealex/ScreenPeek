@@ -46,3 +46,13 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - R2 transport tests verify AWS4 signatures independently with Node crypto, signed content/cache headers, fixed account host, path encoding, 404 versus permissions failures, and redacted errors. Transport responses are simulated; no real R2 upload occurred.
 - Typecheck: 24 files, 0 errors/warnings/hints. Dependency audit: 0 vulnerabilities after adding Sharp and aws4fetch.
 - Available resources: 32 GiB container memory, 5 CPUs; Sharp uses 2 threads and a 32 MiB cache with input pixel limits. No production custom-domain/cache-header check is claimed.
+
+## 1.6 — persistence and importer integration
+
+- 21 tests passed across HTTP transport, actual local D1/R2 persistence, notifications/logging, importer and migrated-seed checks (some executed in separate commands). No failed/skipped tests in these runs.
+- Actual local bindings verify transaction rollback, field locks, stable slugs/creation dates, no resurrection of deleted/blocklisted records, FTS/lookup counts, provider logos, manual collection ownership, season cleanup and persistence after reopening.
+- Importer test adds 50 synthetic titles with owned WebP objects and 40 episodes; rerun adds 0 duplicates and downloads no unchanged images. Manual title lock survives. Capped work queues 49 candidates and records partial status. Source failure retains data; 404 hides rather than deletes and clears the retry entry.
+- CLI exercised twice with `--local --fixture --init --state .cache/fixture-validation`: first added 50, updated 0, 2,282 reported row writes; rerun added 0, updated 50, 1,715 reported row writes. Migrations were not reapplied on rerun.
+- Default `npm run db:setup` ran twice successfully; migrated fixture removal preserves unrelated references.
+- Typecheck: 43 files, 0 errors/warnings/hints. Dependency audit: 0 vulnerabilities.
+- Real REST rollback/numeric-null bindings, TMDb authentication, S3 upload and Telegram delivery remain unverified. All external HTTP tests use simulated responses; real data checks await owner credentials.

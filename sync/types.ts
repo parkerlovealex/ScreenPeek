@@ -1,7 +1,7 @@
 import type { MediaType, TmdbSummary } from './tmdb.ts';
 
 export interface Candidate extends TmdbSummary { type: MediaType; changed: boolean; }
-export interface ExistingTitleState {
+export interface ExistingTitleState extends Record<string, unknown> {
   id: number; type: MediaType; slug: string; updated_at: string;
   locked_fields?: string; hidden?: number; deleted?: number; deleted_at?: string | null;
 }
@@ -48,7 +48,7 @@ export interface TransformedTitle {
   genres: Array<{ slug: string; name: string }>;
   credits: Array<{ person_id: number; role: 'cast' | 'director' | 'creator'; character: string | null; ord: number }>;
   people: SourcePerson[];
-  providers: Array<{ country: string; provider_id: number; provider_name: string; offer_type: 'stream' | 'rent' | 'buy' | 'free' | 'ads'; source_logo: string | null }>;
+  providers: Array<{ country: string; provider_id: number; provider_name: string; offer_type: 'stream' | 'rent' | 'buy' | 'free' | 'ads'; source_logo: string | null; logo_r2?: string | null }>;
   releases: Array<{ country: string; release_date: string | null; certification: string }>;
   seasons: NonNullable<SourceDetails['seasons']>;
   images: { poster: string | null; backdrop: string | null; gallery: string[] };

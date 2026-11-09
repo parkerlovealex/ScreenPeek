@@ -10,6 +10,7 @@ export interface PreparedTitle { candidate: Candidate; source: SourceDetails; da
 export async function prepareCandidates(client: Pick<TmdbClient, 'details'>, candidates: Candidate[], options: {
   now: Date; existing: Map<string, ExistingTitleState>; usedSlugs: Set<string>;
   popularityGate?: number;
+  forceImport?: boolean;
 }) {
   const prepared: PreparedTitle[] = [];
   const failures: Array<{ candidate: Candidate; status?: number; message: string }> = [];
@@ -28,7 +29,7 @@ export async function prepareCandidates(client: Pick<TmdbClient, 'details'>, can
         const source = result.value;
         if (!source || source.id !== candidate.id) throw new Error('Bundled detail ID does not match the candidate');
         const existing = options.existing.get(titleKey(candidate.type, candidate.id));
-        if (!existing && !source.poster_path && (source.popularity ?? 0) < (options.popularityGate ?? 10)) {
+        if (!options.forceImport && !existing && !source.poster_path && (source.popularity ?? 0) < (options.popularityGate ?? 10)) {
           skipped.push({ candidate, reason: 'New title lacks a poster and sufficient popularity after detail verification' });
           continue;
         }

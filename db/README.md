@@ -20,6 +20,7 @@ The equivalent commands are:
 
 ```sh
 node scripts/tool.mjs wrangler d1 execute DB --local --persist-to .wrangler/state --file db/schema.sql
+node scripts/tool.mjs wrangler d1 migrations apply DB --local --persist-to .wrangler/state
 mkdir -p .cache
 node db/seed.mjs > .cache/sample-seed.sql
 node scripts/tool.mjs wrangler d1 execute DB --local --persist-to .wrangler/state --file .cache/sample-seed.sql
@@ -57,6 +58,7 @@ placeholder database ID in `wrangler.toml`, then apply **only** the base schema:
 ```sh
 node scripts/tool.mjs wrangler d1 create movie-db
 node scripts/tool.mjs wrangler d1 execute DB --remote --file db/schema.sql
+node scripts/tool.mjs wrangler d1 migrations apply DB --remote
 ```
 
 `d1 create` creates a real Cloudflare resource; it is not needed for local
@@ -64,3 +66,7 @@ development. Never use `--remote` with the sample seed or sample removal file.
 
 `npm run test:database` uses an isolated actual local D1 instance and verifies
 repeatability, search indexing, safe removal, reseeding and collision refusal.
+
+The npm seed/removal helpers also maintain additive taxonomy/collection relations
+when migrations are present. Prefer those helpers over applying the base removal
+SQL file directly to a migrated database.
