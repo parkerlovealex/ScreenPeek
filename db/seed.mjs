@@ -28,6 +28,8 @@ export function createSeedSql() {
     statements.push(insert('genres', { slug, name }));
   }
   statements.push(insert('languages', { slug: 'en', name: 'English' }));
+  statements.push("INSERT OR IGNORE INTO config(key,value) SELECT 'dev:sample_collection','sample-collection' WHERE NOT EXISTS(SELECT 1 FROM collections WHERE slug='sample-collection');");
+  statements.push(insert('collections', { slug: 'sample-collection', name: 'Sample Collection' }));
   for (const [index, id] of manifest.peopleIds.entries()) {
     statements.push(insert('people', {
       id, slug: `sample-person-${index + 1}`, name: `Sample Person ${index + 1}`,

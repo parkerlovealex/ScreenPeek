@@ -15,5 +15,7 @@ try {
     await bindings.db.batch(cleanup);
   }
   await applyLocalSql(bindings.database, createRemovalSql());
+  const relations = await bindings.db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='collection_titles'");
+  if (relations.length) await bindings.db.batch([{ sql: 'UPDATE collections SET title_count=(SELECT COUNT(*) FROM collection_titles WHERE collection_slug=collections.slug)' }]);
   console.log('Removed only owned sample fixtures and dependent relations from local D1.');
 } finally { await bindings.dispose(); }

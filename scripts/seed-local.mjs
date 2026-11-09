@@ -24,4 +24,15 @@ try {
     sql: `INSERT OR IGNORE INTO title_genres(title_id,title_type,genre_slug)
       SELECT t.id,t.type,j.value FROM titles t,json_each(t.genres) j WHERE j.type='text'`,
   }]);
+  const relation = await bindings.db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='collection_titles'");
+  const ownedCollection = await bindings.db.query("SELECT value FROM config WHERE key='dev:sample_collection'");
+  if (relation.length && ownedCollection[0]?.value === 'sample-collection') {
+    const { manifest } = await import('../db/seed.mjs');
+    const selected = [...manifest.titles.filter(title => title.type === 'movie').slice(0, 3), ...manifest.titles.filter(title => title.type === 'tv').slice(0, 3)];
+    await bindings.db.batch(selected.map(title => ({
+      sql: "INSERT OR IGNORE INTO collection_titles(collection_slug,title_id,title_type,source) VALUES('sample-collection',?,?,'manual')",
+      params: [title.id, title.type],
+    })));
+    await bindings.db.batch([{ sql: "UPDATE collections SET title_count=(SELECT COUNT(*) FROM collection_titles WHERE collection_slug='sample-collection') WHERE slug='sample-collection'" }]);
+  }
 } finally { await bindings.dispose(); }

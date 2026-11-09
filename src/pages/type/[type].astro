@@ -1,0 +1,10 @@
+---
+import Base from '../../layouts/Base.astro';
+if (Astro.params.type === 'movie') return Astro.redirect(`/movies/${Astro.url.search}`, 301);
+if (Astro.params.type === 'tv') return Astro.redirect(`/series/${Astro.url.search}`, 301);
+Astro.response.status = 404;
+Astro.response.headers.set('Cache-Control', 'no-store');
+---
+<Base title="Page not found" noindex pageType="utility">
+  <section class="empty-state"><p class="eyebrow">404 · PAGE NOT FOUND</p><h1>That catalogue type could not be found.</h1><a class="button primary" href="/">Go home</a></section>
+</Base>

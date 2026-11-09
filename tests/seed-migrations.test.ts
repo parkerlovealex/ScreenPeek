@@ -15,6 +15,7 @@ test('migrated sample helpers maintain taxonomy relations and preserve unrelated
     execFileSync(process.execPath, ['scripts/tool.mjs', 'node', 'scripts/seed-local.mjs', state], { encoding: 'utf8' });
     assert.equal((await local.db.query<{ count: number }>('SELECT COUNT(*) AS count FROM titles'))[0].count, 50);
     assert.ok((await local.db.query<{ count: number }>('SELECT COUNT(*) AS count FROM title_genres'))[0].count > 50);
+    assert.equal((await local.db.query<{ count: number }>("SELECT COUNT(*) AS count FROM collection_titles WHERE collection_slug='sample-collection'"))[0].count, 6);
     await local.db.batch([
       { sql: "INSERT INTO titles(id,type,slug,title,genres) VALUES(6001,'movie','owner-title','Owner title','[\"drama\"]')" },
       { sql: "INSERT INTO title_genres VALUES(6001,'movie','drama')" },

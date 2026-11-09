@@ -34,6 +34,11 @@ Images, trailers and ratings are empty. All titles start with `quality_gate=0`;
 synthetic metadata with missing images must not enter a production sitemap.
 There are no real API calls, admin users, ad codes, or monetised destinations.
 
+On a migrated local database the helper also creates a clearly labelled six-title
+sample collection. It attaches fixtures only when its own collection marker is
+present; a pre-existing unowned collection with that slug is preserved. Shared
+lookup rows remain empty after fixture removal, with counts refreshed.
+
 `seed-manifest.json` reserves negative IDs and owns fixtures through the
 `dev:sample_data` config marker. Reruns preserve existing fixture edits and
 rebuild their FTS rows without creating duplicates. A conflicting reserved ID

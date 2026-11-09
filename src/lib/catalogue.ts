@@ -7,6 +7,7 @@ export interface ListFilters {
   type?: 'movie' | 'tv'; page?: number; genre?: string; year?: number;
   minRating?: number; sort?: 'popular' | 'newest' | 'rating' | 'release';
   includeUngated?: boolean;
+  collection?: string; language?: string; mode?: 'new' | 'top10' | 'upcoming';
 }
 export interface CataloguePage { titles: TitleCard[]; total: number; page: number; pages: number; }
 const fields = 't.id,t.type,t.slug,t.title,t.year,t.poster_r2,t.poster_color,t.vote_average,t.views,t.updated_at,t.release_date';
@@ -42,17 +43,23 @@ export async function listTitles(db: D1Database, filters: ListFilters = {}): Pro
     clauses.push('EXISTS(SELECT 1 FROM title_genres g WHERE g.title_id=t.id AND g.title_type=t.type AND g.genre_slug=?)');
     values.push(filters.genre);
   }
+  if (filters.collection) {
+    clauses.push('EXISTS(SELECT 1 FROM collection_titles c WHERE c.title_id=t.id AND c.title_type=t.type AND c.collection_slug=?)');
+    values.push(filters.collection);
+  }
+  if (filters.language) { clauses.push('t.original_language=?'); values.push(filters.language); }
+  if (filters.mode === 'upcoming') clauses.push("t.release_date>date('now')");
   if (filters.year !== undefined) { clauses.push('t.year=?'); values.push(filters.year); }
   if (filters.minRating !== undefined) { clauses.push('t.vote_average>=?'); values.push(filters.minRating); }
   const orders = { popular: 't.popularity DESC', newest: 't.added_at DESC', rating: 't.vote_average DESC,t.vote_count DESC', release: 't.release_date DESC' };
-  const order = orders[filters.sort || 'popular'] || orders.popular;
+  const order = filters.mode === 'new' ? orders.newest : filters.mode === 'upcoming' ? 't.release_date ASC' : filters.mode === 'top10' ? orders.popular : orders[filters.sort || 'popular'] || orders.popular;
   const where = clauses.join(' AND ');
   const count = await db.prepare(`SELECT COUNT(*) AS total FROM titles t WHERE ${where}`).bind(...values).first<{ total: number }>();
-  const total = count?.total || 0;
+  const total = filters.mode === 'top10' ? Math.min(10, count?.total || 0) : count?.total || 0;
   const pages = Math.max(1, Math.ceil(total / 24));
   const page = Number.isSafeInteger(filters.page) && (filters.page || 0) > 0 ? filters.page! : 1;
   if (page > pages) return { titles: [], total, page, pages };
-  const result = await db.prepare(`SELECT ${fields} FROM titles t WHERE ${where} ORDER BY ${order},t.id DESC LIMIT 24 OFFSET ?`).bind(...values, (page - 1) * 24).all<TitleCard>();
+  const result = await db.prepare(`SELECT ${fields} FROM titles t WHERE ${where} ORDER BY ${order},t.id DESC,t.type LIMIT ? OFFSET ?`).bind(...values, filters.mode === 'top10' ? 10 : 24, (page - 1) * 24).all<TitleCard>();
   return { titles: result.results, total, page, pages };
 }
 

@@ -92,3 +92,10 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Actual local D1 tests: 8 passed, covering roles/deduplication, movie/TV ID collisions, 24+6 pagination, visibility/gating, missing/deleted people, cache/index policies and failures. A final media-type sort key makes ID/popularity ties deterministic.
 - Production browser suite: 11 passed, including title → cast → filmography at 360px, owned-data cards, no overflow/external requests and styled unknown-person HTTP 404.
 - Typecheck: 75 files, 0 errors/warnings/hints. Build and source boundary check pass. Biography uses native expansion; no client script or runtime source request was added.
+
+## 1.12 — taxonomy and discovery hubs
+
+- Actual local D1 hub tests: 8 passed, covering genre/language/manual collection membership, overrides/hidden paths, binding safety, ordering, future-only upcoming data, Top10 cap, pagination, gating/cache and failures.
+- Production browser suite: 18 passed, including all six hubs at 360px, language page3, styled missing taxonomy and canonical type aliases. Every poster grid remains at most 24 cards; Top10 is a ten-item ranked list.
+- Typecheck: 86 files, 0 errors/warnings/hints. Build and boundary check pass.
+- Local six-title sample collection added without taking ownership of pre-existing unowned data. Migrated seed/removal test passed again, preserving unrelated references.
