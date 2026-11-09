@@ -1,3 +1,5 @@
+import { cachedCatalogue } from './lib/catalogue-cache';
+import { cachedWatch } from './lib/watch-cache';
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
 import { authenticateAdmin, AdminError, permitted } from './lib/admin/access';
@@ -25,7 +27,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       if (admin) context.locals.adminFailure = error instanceof AdminError ? { status: error.status, message: error.message } : { status: 503, message: 'Admin access is temporarily unavailable.' };
     }
   }
-  const original = await next();
+  const cache = env.DEPLOYMENT_ENV === 'production' && !adTest ? (caches as unknown as { default: Cache }).default : undefined;
+  const original = path.startsWith('/watch/') ? await cachedWatch(context.request, cache, next)
+    : await cachedCatalogue(context.request, cache, next);
   const response = admin || adTest ? new Response(original.body, { status: original.status, statusText: original.statusText, headers: original.headers }) : original;
   if (admin || adTest) {
     response.headers.set('Cache-Control', 'private, no-store');

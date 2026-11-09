@@ -23,7 +23,7 @@
 - [x] 1.20 Trust pages (About with TMDb attribution, Privacy, DMCA, Contact) + styled 404
 - [x] 1.21 SEO: meta/OG/JSON-LD, dynamic sitemaps, robots.txt, noindex gating
 - [x] 1.22 Deploy prep: `DEPLOY-CHECKLIST.md`, Cloudflare bindings wired, Phase 1 verification list run + reported
-- [ ] 1.23 Hybrid static tier: nightly workflow = sync → prerender hubs + top `static_top_n` titles → deploy; build fails if static files > 15,000
+- [x] 1.23 Hybrid static tier: nightly workflow = sync → prerender hubs + top `static_top_n` titles → deploy; build fails if static files > 15,000
 - [ ] 1.24 CI speed gate: byte-budget hard fail (>~100 KB first screen) + Lighthouse mobile ≥90 report on home/detail/list (ads as placeholders)
 - [ ] 1.25 Speculation-rules prefetch on grids + CSS fade-in (no JS files added)
 - [ ] 1.26 R2 custom domain + immutable 1-year cache headers; width/height on all images (CLS 0)

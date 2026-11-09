@@ -1,7 +1,11 @@
 ---
+import { paginationLink } from '../../lib/listing-path';
 import Base from '../../layouts/Base.astro';
-if (Astro.params.type === 'movie') return Astro.redirect(`/movies/${Astro.url.search}`, 301);
-if (Astro.params.type === 'tv') return Astro.redirect(`/series/${Astro.url.search}`, 301);
+if (['movie', 'tv'].includes(Astro.params.type || '')) {
+  const url = new URL(Astro.url); url.pathname = Astro.params.type === 'movie' ? '/movies/' : '/series/';
+  const page = Number(url.searchParams.get('page') || 1);
+  return Astro.redirect(paginationLink(url, Number.isSafeInteger(page) && page > 0 ? page : 1), 301);
+}
 Astro.response.status = 404;
 Astro.response.headers.set('Cache-Control', 'no-store');
 ---

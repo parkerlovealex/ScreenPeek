@@ -1,11 +1,9 @@
 ---
+import { listingBase, paginationLink } from '../lib/listing-path';
 interface Props { page: number; pages: number; url: URL; }
 const { page, pages, url } = Astro.props;
-const link = (number: number) => {
-  const query = new URLSearchParams(url.searchParams);
-  if (number === 1) query.delete('page'); else query.set('page', String(number));
-  return `${url.pathname}${query.size ? `?${query.toString()}` : ''}`;
-};
+const link = (number: number) => paginationLink(url, number);
+const action = listingBase(url.pathname) ? `${listingBase(url.pathname)}filter/` : url.pathname;
 const numbers = [...new Set([1, ...Array.from({ length: 3 }, (_, index) => page + index - 1), pages])]
   .filter(number => number >= 1 && number <= pages).sort((a, b) => a - b);
 const hidden = [...url.searchParams].filter(([key]) => key !== 'page');
@@ -19,7 +17,7 @@ const hidden = [...url.searchParams].filter(([key]) => key !== 'page');
     </>)}
     {page < pages ? <a href={link(page + 1)} rel="next" aria-label="Next page">→</a> : <span class="page-disabled" aria-disabled="true">→</span>}
   </nav>
-  <form class="page-jump" action={url.pathname} method="get">
+  <form class="page-jump" action={action} method="get">
     {hidden.map(([name, value]) => <input type="hidden" name={name} value={value} />)}
     <label for="jump-page">Go to page</label><input id="jump-page" type="number" name="page" min="1" max={pages} value={page} inputmode="numeric" required />
     <button type="submit">Go</button>

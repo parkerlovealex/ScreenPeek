@@ -15,7 +15,7 @@ test('canonical URLs use the configured origin, clean filters/country, and retai
   const origin = 'https://screenpeek.example.test';
   assert.equal(siteOrigin('https://user:password@example.test'), 'https://example.workers.dev');
   assert.equal(productionSeo({ SITE_URL: origin, DEPLOYMENT_ENV: 'preview' }), false);
-  assert.equal(canonicalUrl(new URL('https://untrusted.test/movies/?page=2'), origin, 2), `${origin}/movies/?page=2`);
+  assert.equal(canonicalUrl(new URL('https://untrusted.test/movies/?page=2'), origin, 2), `${origin}/movies/page/2/`);
   assert.equal(canonicalUrl(new URL('https://untrusted.test/movies/?page=2&genre=drama'), origin, 2), `${origin}/movies/`);
   assert.equal(canonicalUrl(new URL('https://untrusted.test/watch/title/?country=GB'), origin), `${origin}/watch/title/`);
   assert.equal(new URL(canonicalUrl(new URL('https://untrusted.test//evil.test/'), origin)).origin, origin);

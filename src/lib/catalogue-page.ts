@@ -17,7 +17,7 @@ export async function loadCataloguePage(db: D1Database, url: URL, type: 'movie' 
   const missing = !failed && catalogue.page > catalogue.pages;
   const filtered = ['genre', 'year', 'rating', 'sort'].some(key => url.searchParams.has(key));
   const status: 200 | 404 | 503 = failed ? 503 : missing ? 404 : 200;
-  const cacheControl = sample || failed || missing ? 'no-store' : 'public, s-maxage=3600, stale-while-revalidate=604800';
+  const cacheControl = sample || failed || missing || filtered ? 'no-store' : 'public, s-maxage=3600, stale-while-revalidate=604800';
   const pageTitle = failed ? 'Catalogue unavailable' : missing ? 'Page not found' : `${label}${catalogue.page > 1 ? ` — Page ${catalogue.page}` : ''}`;
   return { type, label, filters, catalogue, options, sample, failed, missing, filtered, status, cacheControl, pageTitle };
 }

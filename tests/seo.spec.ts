@@ -3,10 +3,10 @@ import { testWorker } from './helpers/worker.ts';
 
 test('preview canonicals and detail structured metadata remain safe across country/filter variants', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.goto('/movies/?page=2');
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://example.workers.dev/movies/?page=2');
+  await page.goto('/movies/page/2/');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://example.workers.dev/movies/page/2/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
-  await page.goto('/movies/?genre=drama');
+  await page.goto('/movies/filter/?genre=drama');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://example.workers.dev/movies/');
   const href = await page.locator('[data-poster-card]').first().getAttribute('href');
   await page.goto(href!);

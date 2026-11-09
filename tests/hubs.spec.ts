@@ -14,11 +14,11 @@ for (const route of ['/genre/drama/', '/language/en/', '/collection/sample-colle
 }
 
 test('language pagination, missing taxonomy, and canonical type aliases', async ({ page, request }) => {
-  await page.goto('/language/en/?page=3');
+  await page.goto('/language/en/page/3/');
   await expect(page.locator('[data-poster-card]')).toHaveCount(2);
   expect((await page.goto('/genre/not-a-known-genre/'))?.status()).toBe(404);
   await expect(page.locator('header.site-header')).toBeVisible();
   const alias = await request.get('/type/movie/?page=2', { maxRedirects: 0 });
   expect(alias.status()).toBe(301);
-  expect(alias.headers().location).toBe('/movies/?page=2');
+  expect(alias.headers().location).toBe('/movies/page/2/');
 });

@@ -54,6 +54,8 @@ export async function prepareProduction(root = '.', env = process.env) {
   const path = resolve(root, 'dist/server/wrangler.json');
   const source = JSON.parse(await readFile(path, 'utf8'));
   const prepared = productionConfig(source, env);
+  const manifest = JSON.parse(await readFile(resolve(root, 'dist/static-manifest.json'), 'utf8'));
+  if (manifest.mode !== 'production' || manifest.sample || manifest.site !== prepared.vars.SITE_URL || manifest.files > 15000 || manifest.vars?.R2_PUBLIC_BASE !== prepared.vars.R2_PUBLIC_BASE || (manifest.vars?.ADS_ENABLED || '0') !== prepared.vars.ADS_ENABLED) throw new Error('Rebuild the production static tier from the real catalogue and matching SITE_URL before deployment.');
   await writeFile(path, JSON.stringify(prepared, null, 2) + '\n');
   return path;
 }

@@ -1,3 +1,4 @@
+import { purgeAfterDeploy, purgeSettings } from '../scripts/purge.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -37,4 +38,34 @@ test('production preparation refuses placeholders, non-public URLs, service imag
   assert.throws(() => productionConfig({ ...input, vars: { ...input.vars, API_TOKEN: 'private' } }, env));
   const checklist = '# TASKS\n## Phase 1\n' + Array.from({ length: 38 }, (_, index) => `- [x] 1.${index + 1} Task`).join('\n') + '\n## Phase 2\n- [ ] 2.1 Later';
   assert.equal(phase1Complete(checklist), true); assert.equal(phase1Complete(checklist.replace('[x]', '[ ]')), false);
+});
+
+test('production preparation rejects a preview or mismatched static snapshot before changing bindings', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'screenpeek-static-deploy-'));
+  try {
+    await mkdir(join(root, 'dist/server'), { recursive: true });
+    const original = JSON.stringify(input);
+    await writeFile(join(root, 'dist/server/wrangler.json'), original);
+    const manifest = { mode: 'production', sample: false, site: env.SITE_URL, files: 30, vars: { R2_PUBLIC_BASE: env.R2_PUBLIC_BASE, ADS_ENABLED: '0' } };
+    for (const patch of [{ mode: 'preview' }, { sample: true }, { site: 'https://different.test' }, { files: 15001 }, { vars: { R2_PUBLIC_BASE: 'https://different.test' } }]) {
+      await writeFile(join(root, 'dist/static-manifest.json'), JSON.stringify({ ...manifest, ...patch }));
+      await assert.rejects(prepareProduction(root, env), /Rebuild the production static tier/);
+      assert.equal(await readFile(join(root, 'dist/server/wrangler.json'), 'utf8'), original);
+    }
+    await writeFile(join(root, 'dist/static-manifest.json'), JSON.stringify(manifest));
+    await prepareProduction(root, env);
+    assert.equal(JSON.parse(await readFile(join(root, 'dist/server/wrangler.json'), 'utf8')).assets.run_worker_first, false);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('post-deploy purge uses only the configured zone and refuses unconfirmed or failed purges', async () => {
+  assert.throws(() => purgeSettings({}), /zone ID/);
+  const settings = { CLOUDFLARE_ZONE_ID: 'c'.repeat(32), CLOUDFLARE_API_TOKEN: 'fixture-token' };
+  await purgeAfterDeploy(settings, async (url, init) => {
+    assert.equal(url, `https://api.cloudflare.com/client/v4/zones/${settings.CLOUDFLARE_ZONE_ID}/purge_cache`);
+    assert.equal(init.method, 'POST'); assert.deepEqual(JSON.parse(init.body), { purge_everything: true });
+    return Response.json({ success: true });
+  });
+  await assert.rejects(purgeAfterDeploy(settings, async () => Response.json({ success: false })), /did not confirm/);
+  await assert.rejects(purgeAfterDeploy(settings, async () => new Response(null, { status: 503 })), /Deployment succeeded.*purge failed/);
 });

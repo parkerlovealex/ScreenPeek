@@ -15,7 +15,7 @@ const visible = 't.hidden=0 AND t.deleted=0 AND t.deleted_at IS NULL';
 const validSorts = ['popular', 'newest', 'rating', 'release'] as const;
 
 export function parseListFilters(url: URL, type?: 'movie' | 'tv'): ListFilters {
-  const requested = Number(url.searchParams.get('page') || 1);
+  const requested = Number(url.searchParams.get('page') || /\/page\/([1-9]\d*)\/$/.exec(url.pathname)?.[1] || 1);
   const year = Number(url.searchParams.get('year'));
   const rating = Number(url.searchParams.get('rating'));
   const genre = url.searchParams.get('genre') || '';

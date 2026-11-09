@@ -26,14 +26,14 @@ test('movie filters and numbered pagination work with real navigation and no Jav
     await page.goto('/movies/');
     await expect(page.locator('[data-catalogue-grid] [data-poster-card]')).toHaveCount(24);
     await page.getByRole('navigation', { name: 'Pagination', exact: true }).getByRole('link', { name: /Page 2/i }).click();
-    await expect(page).toHaveURL(/page=2/);
+    await expect(page).toHaveURL(/page\/2\//);
     await expect(page.locator('[data-catalogue-grid] [data-poster-card]')).toHaveCount(6);
     await page.goto('/movies/');
     const filters = page.getByRole('form', { name: 'Catalogue filters' });
     await filters.locator('select[name="genre"]').selectOption('drama');
     await filters.getByRole('button', { name: /apply|filter/i }).click();
     await expect(page.locator('[data-catalogue-grid] [data-poster-card]')).toHaveCount(10);
-    const missing = await page.goto('/movies/?page=9999');
+    const missing = await page.goto('/movies/page/9999/');
     expect(missing?.status()).toBe(404);
     await expect(page.locator('header')).toBeVisible();
   } finally { await context.close(); }

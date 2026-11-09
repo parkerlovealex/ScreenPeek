@@ -8,7 +8,7 @@ import { httpsDestination } from '../links.ts';
 import { trustSlugs } from '../trust.ts';
 
 export const settingsFields = {
-  site_name: 'Site name', site_tagline: 'Tagline', ads_enabled: 'Master ads switch', popunder_cap_hours: 'Popunder cap (hours)',
+  static_top_n: 'Prebuilt top titles', site_name: 'Site name', site_tagline: 'Tagline', ads_enabled: 'Master ads switch', popunder_cap_hours: 'Popunder cap (hours)',
   maintenance: 'Maintenance mode', ratings_external: 'Show cached external ratings', sync_popularity_gate: 'Sync popularity gate', sync_max_titles: 'Max titles per sync',
   social_links: 'Social link slugs (comma-separated)',
 } as const;
@@ -104,6 +104,7 @@ export async function applyAdminAction(env: AdminEnvironment, identity: AdminIde
     if (['ads_enabled', 'maintenance', 'ratings_external'].includes(key) && !['0', '1'].includes(value)) throw new AdminError('Use 0 for off or 1 for on.');
     if (key === 'popunder_cap_hours' && (!Number.isFinite(Number(value)) || Number(value) < 1 || Number(value) > 168)) throw new AdminError('Use 1–168 hours.');
     if (key === 'sync_popularity_gate' && (!value || !Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100_000)) throw new AdminError('Use a popularity gate from 0 to 100000.');
+    if (key === 'static_top_n' && (!/^\d+$/.test(value) || Number(value) > 15000)) throw new AdminError('Use 0–15000; the total asset cap still applies.');
     if (key === 'sync_max_titles' && (!/^[1-9]\d*$/.test(value) || Number(value) > 2000)) throw new AdminError('Use 1–2000 titles per run.');
     if (key === 'site_name' && !value) throw new AdminError('A site name is required.');
     if (key === 'social_links') {

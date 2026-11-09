@@ -1,3 +1,4 @@
+import { listingBase, paginationLink } from './listing-path.ts';
 import { mediaUrl } from './media.ts';
 import type { TitlePageData } from './detail.ts';
 import type { TitleCard } from './catalogue.ts';
@@ -16,8 +17,9 @@ export const productionSeo = (env: SeoEnvironment) => env.DEPLOYMENT_ENV === 'pr
 export const filteredUrl = (url: URL) => ['genre', 'year', 'rating', 'sort'].some(key => url.searchParams.has(key));
 export function canonicalUrl(url: URL, origin: string, page = 1) {
   const result = new URL(origin);
-  result.pathname = url.pathname;
-  if (!filteredUrl(url) && Number.isSafeInteger(page) && page > 1) result.searchParams.set('page', String(page));
+  const base = listingBase(url.pathname);
+  result.pathname = base ? filteredUrl(url) ? base : paginationLink(new URL(base, origin), page) : url.pathname;
+  if (!base && !filteredUrl(url) && Number.isSafeInteger(page) && page > 1) result.searchParams.set('page', String(page));
   return result.href;
 }
 const isoDate = (value: string | null | undefined) => value && /^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(value) && Number.isFinite(Date.parse(value)) ? value.slice(0, 10) : undefined;

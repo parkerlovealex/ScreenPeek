@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/tool.mjs astro dev --host 0.0.0.0 --ignore-lock",
-    "build": "node scripts/tool.mjs astro build",
+    "build": "node scripts/build.mjs",
     "typecheck": "node scripts/tool.mjs astro check",
     "preview": "node scripts/tool.mjs astro preview --host 0.0.0.0 --ignore-lock",
     "test:scaffold": "playwright test tests/scaffold.spec.ts",
@@ -36,7 +36,8 @@
     "test:deploy": "node --test tests/deploy.test.mjs",
     "deploy:prepare": "node scripts/tool.mjs node scripts/deploy-config.mjs",
     "deploy:dry-run": "node scripts/tool.mjs wrangler deploy --dry-run --config dist/server/wrangler.json --outdir .cache/deploy-dry-run",
-    "deploy": "node scripts/tool.mjs node scripts/deploy.mjs"
+    "deploy": "node scripts/tool.mjs node --use-env-proxy scripts/deploy.mjs",
+    "test:static": "node scripts/tool.mjs node --test tests/static.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
