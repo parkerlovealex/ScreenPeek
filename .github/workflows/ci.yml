@@ -42,6 +42,11 @@ jobs:
         run: npm run test:images
       - name: Sync persistence and recovery integration tests
         run: npm run test:sync-integration
+      - name: Private backup encoding and retention tests
+        run: |
+          npm run test:backup
+          npm run backup:local
+          node scripts/tool.mjs node --test tests/backup-roundtrip.test.ts
       - name: Database and removable seed tests
         run: npm run test:database
       - name: Public catalogue query tests

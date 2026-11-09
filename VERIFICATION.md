@@ -182,6 +182,8 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 
 ## Deferred deployment verification
 
+- **1.34:** configure/verify the separate private R2 backup bucket, scoped S3 keys and first scheduled backup/retention; repeat restoration against a separate cloud D1. No public backup storage is permitted.
+
 - **1.30:** verify generated OG cards through the real R2 hostname and social crawlers.
 - **1.33:** verify Cloudflare purge/analytics and Search Console on the real account/domain; local purge transport is mocked, usage is explicitly unavailable with dashboard links.
 
@@ -217,3 +219,7 @@ One actual-Worker browser test verifies provider deduplication, the first three 
 ## 1.33 — admin safety and SEO controls
 
 Four native admin tests and two ad tests pass. Browser regression plus new v2 flow pass: exact ad Undo, stale/role rejection, KV propagation, mocked purge, duplicate warning, Dashboard retry, SEO-created 301 and rendered verification meta. Content Undo restores lookup counts. Five per-format toggles and plain-text ads.txt editing are added behind the master/platform switches. History is actor-stamped and searchable by actor/entity; quota cards show unavailable rather than invented values, with Cloudflare/Search Console/CI links. Typecheck/build/boundary/actionlint pass. Remaining universal editing powers and tools are verified in their later numbered tasks.
+
+## 1.34 — private daily backup
+
+Two encoding/retention/S3 tests pass. Actual Wrangler local export succeeds; a third test restores its archive into an isolated native D1 and verifies title/FTS/config data. D1 cannot export virtual tables, so derived FTS is rebuilt from title rows. The guarded daily workflow uploads full application SQL plus config to separate private R2, retains 14 only after a successful upload, and excludes platform secrets. Typecheck, Actionlint and whitespace checks pass. Remote execution and access controls are deferred as requested.

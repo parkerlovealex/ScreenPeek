@@ -39,7 +39,10 @@
     "deploy": "node scripts/tool.mjs node --use-env-proxy scripts/deploy.mjs",
     "test:static": "node scripts/tool.mjs node --test tests/static.test.ts",
     "check:performance": "node scripts/tool.mjs node scripts/performance.ts",
-    "test:performance-gate": "node --test tests/performance-gate.test.mjs"
+    "test:performance-gate": "node --test tests/performance-gate.test.mjs",
+    "backup:run": "node scripts/tool.mjs node --use-env-proxy scripts/backup.ts",
+    "backup:local": "npm run backup:run -- --local",
+    "test:backup": "node --test tests/backup.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
