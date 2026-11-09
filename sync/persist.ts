@@ -9,7 +9,7 @@ const locked = (alias: string, field: string) => `((CASE WHEN json_valid(${alias
 export async function persistTitle(
   db: SqlClient,
   data: TransformedTitle,
-  media: { poster: string | null; backdrop: string | null; gallery: string[] },
+  media: { poster: string | null; backdrop: string | null; gallery: string[]; posterColor?: string | null },
   options: { popularityGate?: number } = {},
 ) {
   const threshold = options.popularityGate ?? 10;
@@ -21,6 +21,7 @@ export async function persistTitle(
     budget: data.extra.budget, revenue: data.extra.revenue,
     quality_gate: 0, added_at: data.title.updated_at,
   };
+  if (media.posterColor !== undefined) row.poster_color = media.posterColor;
   const columns = Object.keys(row);
   const parameters: SqlValue[] = [];
   const values = columns.map(column => {

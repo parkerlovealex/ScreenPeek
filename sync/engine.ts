@@ -1,3 +1,4 @@
+import { posterColour } from './colour.ts';
 import { composeOg } from './og.ts';
 import type { TmdbClient } from './tmdb.ts';
 import type { Candidate, ExistingTitleState, SourcePerson } from './types.ts';
@@ -19,7 +20,7 @@ interface PersonState extends Record<string, unknown> {
   locked_fields: string; deleted_at: string | null;
 }
 interface TitleState extends ExistingTitleState {
-  poster_r2: string | null; backdrop_r2: string | null; gallery_r2: string;
+  poster_r2: string | null; poster_color: string | null; backdrop_r2: string | null; gallery_r2: string;
 }
 interface SeasonPayload { episodes?: Array<{ episode_number: number; name?: string; overview?: string; air_date?: string; still_path?: string | null }>; }
 const parseArray = (value: string) => { try { const parsed: unknown = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; } catch { return []; } };
@@ -46,7 +47,7 @@ export async function runSync(options: {
     logId = await startSyncLog(db, summary.startedAt, summary.source);
     const config = Object.fromEntries((await db.query<{ key: string; value: string }>('SELECT key,value FROM config')).map(row => [row.key, row.value]));
     const threshold = Number(config.sync_popularity_gate || 10);
-    const existing = new Map((await db.query<TitleState>('SELECT id,type,slug,updated_at,locked_fields,hidden,deleted,deleted_at,poster_r2,backdrop_r2,gallery_r2 FROM titles')).map(row => [titleKey(row.type, row.id), row]));
+    const existing = new Map((await db.query<TitleState>('SELECT id,type,slug,updated_at,locked_fields,hidden,deleted,deleted_at,poster_r2,poster_color,backdrop_r2,gallery_r2 FROM titles')).map(row => [titleKey(row.type, row.id), row]));
     const people = new Map((await db.query<PersonState>('SELECT id,slug,bio,profile_r2,locked_fields,deleted_at FROM people')).map(row => [row.id, row]));
     const blockedRows = await db.query<{ tmdb_id: number; type: string }>('SELECT tmdb_id,type FROM blocklist');
     const blocked = new Set(blockedRows.map(row => `${row.type}:${row.tmdb_id}`));
@@ -137,8 +138,12 @@ export async function runSync(options: {
           }
           provider.logo_r2 = providerLogos.get(provider.provider_id) || null;
         }
+        let colour: string | null | undefined;
+        if (poster.keys['185'] && !locks.includes('poster_color') && (previous?.poster_r2 !== poster.keys['185'] || !previous?.poster_color)) {
+          try { colour = await posterColour(client, images, poster.keys['185'], locks.includes('poster_r2') ? null : data.images.poster); } catch { warn(`${candidate.type}:${candidate.id}: poster colour extraction failed.`); }
+        }
         const gallery = backdrop.keys['300'] ? [backdrop.keys['300']] : [];
-        rowsWritten += (await persistTitle(db, data, { poster: poster.keys['185'] || null, backdrop: backdrop.keys['300'] || null, gallery }, { popularityGate: threshold })).rowsWritten;
+        rowsWritten += (await persistTitle(db, data, { poster: poster.keys['185'] || null, backdrop: backdrop.keys['300'] || null, gallery, posterColor: colour }, { popularityGate: threshold })).rowsWritten;
         const storedTitle = (await db.query<{ id: number; type: 'movie' | 'tv'; title: string; year: number | null; quality_gate: number; updated_at: string; locked_fields: string }>('SELECT id,type,title,year,quality_gate,updated_at,locked_fields FROM titles WHERE id=? AND type=? AND hidden=0 AND deleted=0 AND deleted_at IS NULL', [candidate.id, candidate.type]))[0];
         if (storedTitle?.quality_gate && data.images.poster && !parseArray(storedTitle.locked_fields).some(field => ['og_r2','poster_r2'].includes(String(field)))) {
           try {

@@ -19,7 +19,7 @@
     "test:database": "node --test tests/database.test.mjs",
     "test:tmdb": "node --test tests/tmdb.test.ts",
     "test:sync": "node --test tests/tmdb.test.ts tests/collectors.test.ts tests/transform.test.ts",
-    "test:images": "node scripts/tool.mjs node --test tests/posters.test.ts tests/r2.test.ts tests/og.test.ts",
+    "test:images": "node scripts/tool.mjs node --test tests/posters.test.ts tests/r2.test.ts tests/og.test.ts tests/colour.test.ts",
     "db:migrate": "node scripts/tool.mjs wrangler d1 migrations apply movie-db --local --persist-to .wrangler/state",
     "sync:run": "node scripts/tool.mjs node --use-env-proxy --env-file-if-exists=.env sync/sync.ts",
     "sync:fixture": "npm run sync:run -- --local --fixture",

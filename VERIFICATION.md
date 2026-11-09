@@ -202,3 +202,7 @@ Two route-policy tests pass against actual local Worker/D1: stored redirect retu
 ## 1.30 — generated social cards
 
 Ten image tests and all 21 sync integration tests pass. The importer creates owned OG keys for 50 gated fixture titles, with no duplicate titles or unchanged-source image re-downloads on rerun. Encoded cards are 1200×630 WebP with immutable headers, escaped stored text, deterministic keys and current field-lock checks. Owned R2 posters are reused when metadata changes. One browser test verifies gated OG URL and dimension tags. Build/typecheck pass. Live R2 URLs and social crawler fetching remain deferred to deployment.
+
+## 1.31 — dominant poster colour and swipe rows
+
+Eleven image tests and 21 sync integration tests pass; the importer explicitly verifies all 50 fixture titles have safe hex colours and reruns do not redownload unchanged imagery. Extraction reads owned poster bytes, observes current field locks at persistence, and refreshes only changed/missing colours. A browser test confirms detail tint, horizontal snapping on Trending/Cast and no mobile overflow. Build/typecheck pass.

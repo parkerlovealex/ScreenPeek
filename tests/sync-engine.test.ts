@@ -22,6 +22,7 @@ test('local importer: 50 titles with owned images, FTS, seasons and idempotent r
     assert.equal(first.updated, 0);
     assert.equal((await local.db.query<{ count: number }>('SELECT COUNT(*) AS count FROM titles WHERE quality_gate=1'))[0].count, 50);
     assert.equal((await local.db.query<{ count: number }>("SELECT COUNT(*) AS count FROM titles WHERE quality_gate=1 AND og_r2 LIKE 'og/%'"))[0].count, 50);
+    assert.equal((await local.db.query<{ count: number }>("SELECT COUNT(*) AS count FROM titles WHERE poster_color GLOB '#[a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9][a-f0-9]'"))[0].count, 50);
     assert.equal((await local.db.query<{ count: number }>("SELECT COUNT(*) AS count FROM titles_fts WHERE titles_fts MATCH 'Lantern'"))[0].count, 50);
     assert.equal((await local.db.query<{ count: number }>('SELECT COUNT(*) AS count FROM episodes'))[0].count, 40);
     const row = (await local.db.query<{ poster_r2: string }>('SELECT poster_r2 FROM titles WHERE id=8000001'))[0];

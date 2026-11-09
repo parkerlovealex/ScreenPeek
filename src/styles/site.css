@@ -37,3 +37,4 @@
 img[data-lazy-src]{visibility:hidden}.poster-frame:has(>img[data-lazy-src]){aspect-ratio:185/278}
 
 @media(prefers-reduced-motion:no-preference){#content{animation:content-in .16s ease-out}}@keyframes content-in{from{opacity:.9}to{opacity:1}}
+.detail-hero{background:linear-gradient(120deg,color-mix(in srgb,var(--poster-color,#20202b) 16%,var(--panel)),var(--panel))}
