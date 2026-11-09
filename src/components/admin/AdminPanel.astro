@@ -7,7 +7,7 @@ import { adMap } from '../../lib/ads';
 import { dhakaInput, settingsFields } from '../../lib/admin/actions';
 interface Props { module: AdminModule; actor?: AdminIdentity; data?: AdminData; error?: string; message?: string; jobUrl?: string; platformAds?: boolean; secrets?: Array<{ name: string; set: boolean }>; submitted?: URLSearchParams; }
 const { module, actor, data, error, message, jobUrl, platformAds = false, secrets = [], submitted } = Astro.props;
-const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export' } as const;
+const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', pages: 'Pages', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export' } as const;
 const heading = modules[module as keyof typeof modules] || 'Admin';
 const canWrite = actor && permitted(actor, module, true);
 const link = data?.selectedLink;
@@ -69,6 +69,14 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
       return <form class="admin-form" method="post"><input type="hidden" name="key" value={key} /><input type="hidden" name="revision" value={setting?.revision ?? -1} /><fieldset disabled={!canWrite}><label>{label}<input name="value" value={submitted?.get('key') === key ? submitted.get('value') || '' : setting?.value || (key === 'site_name' ? 'ScreenPeek' : '')} maxlength="250" aria-describedby={`setting-help-${key}`} /></label><small id={`setting-help-${key}`}>{['ads_enabled', 'maintenance', 'ratings_external'].includes(key) ? '0 = off · 1 = on' : key === 'popunder_cap_hours' ? '1–168 hours · default 24' : key === 'sync_max_titles' ? '1–2000; the nightly workflow applies this limit.' : 'Static pages apply changes at the next build.'}</small><button type="submit">Save {label.toLowerCase()}</button></fieldset></form>;
     })}</div><section class="catalogue-section"><h2>Worker configuration status</h2><dl class="title-facts">{secrets.map(secret => <div><dt>{secret.name}</dt><dd>{secret.set ? 'Set ✓' : 'Not set'}</dd></div>)}</dl><p>Sync-only source and R2 S3 credentials belong in GitHub Actions; their status is not visible to this Worker.</p></section></>}
     {module === 'backup' && <section class="empty-state"><h2>Export site configuration</h2><p>The JSON contains ad codes and destinations. Store it privately. It contains configuration and content overrides; it does not contain the full catalogue or R2 objects.</p><a class="button primary" href="?download=1">Download configuration JSON</a></section>}
+    {module === 'pages' && <>
+      <nav class="hub-navigation" aria-label="Information pages">{data.documents.map(document => <a href={`?edit=${document.slug}`}>{document.title}</a>)}</nav>
+      {data.documents.filter(document => document.slug === (Astro.url.searchParams.get('edit') || 'about')).map(document => <section class="catalogue-section"><h2>Edit {document.title}</h2><form class="admin-form" method="post"><input type="hidden" name="slug" value={document.slug} /><input type="hidden" name="revision" value={document.revision} /><fieldset disabled={!canWrite}>
+        <label>Page title *<input name="title" value={submitted?.get('slug') === document.slug ? submitted.get('title') : document.title} maxlength="120" required /></label>
+        <label>Page content (Markdown) *<textarea name="body_md" rows="18" maxlength="20000" required>{submitted?.get('slug') === document.slug ? submitted.get('body_md') : document.body_md}</textarea></label><small>Headings, lists, emphasis and links are supported. Raw HTML and inline images do not render. Keep public contact details current. Static pages update on the next build; required attribution stays visible.</small>
+        <button class="primary" type="submit">Save page</button>
+      </fieldset></form><a href={document.slug === '404' ? '/404/' : `/${document.slug}/`}>Open public page →</a></section>)}
+    </>}
     {(module === 'links' || module === 'content') && data.pages > 1 && <nav class="pagination" aria-label="Admin pages">{data.page > 1 && <a href={pageLink(data.page - 1)}>Previous</a>}<span>Page {data.page} of {data.pages}</span>{data.page < data.pages && <a href={pageLink(data.page + 1)}>Next</a>}</nav>}
   </>}
 </Base>

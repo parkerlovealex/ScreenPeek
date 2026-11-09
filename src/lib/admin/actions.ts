@@ -5,6 +5,7 @@ import type { AdminEnvironment, MirrorRef } from './changes.ts';
 import { adAllowed, adMap } from '../ads.ts';
 import type { AdPage, AdPlacement } from '../ads.ts';
 import { httpsDestination } from '../links.ts';
+import { trustSlugs } from '../trust.ts';
 
 export const settingsFields = {
   site_name: 'Site name', site_tagline: 'Tagline', ads_enabled: 'Master ads switch', popunder_cap_hours: 'Popunder cap (hours)',
@@ -118,6 +119,15 @@ export async function applyAdminAction(env: AdminEnvironment, identity: AdminIde
     if (previous) { sql = 'UPDATE config SET value=?,revision=revision+1 WHERE key=? AND revision=?'; params = [value, key, revision(form)]; }
     else { if (revision(form) !== -1) throw new AdminError('Reload this setting.'); sql = 'INSERT OR IGNORE INTO config(key,value) VALUES(?,?)'; params = [key, value]; }
     entity = 'config'; id = key; before = previous; after = { key, value }; mirrors = [{ kind: 'config', key }];
+  } else if (module === 'pages') {
+    const slug = text(form, 'slug', 20);
+    if (!(trustSlugs as readonly string[]).includes(slug)) throw new AdminError('Choose a supported information page.');
+    const title = text(form, 'title', 120).trim(), body_md = text(form, 'body_md', 20_000);
+    if (!title || !body_md.trim()) throw new AdminError('A title and page content are required.');
+    const previous = await env.DB.prepare('SELECT * FROM pages WHERE slug=?').bind(slug).first();
+    if (previous) { sql = "UPDATE pages SET title=?,body_md=?,revision=revision+1,updated_at=datetime('now') WHERE slug=? AND revision=?"; params = [title, body_md, slug, revision(form)]; }
+    else { if (revision(form) !== -1) throw new AdminError('Reload this page before saving.'); sql = 'INSERT OR IGNORE INTO pages(slug,title,body_md) VALUES(?,?,?)'; params = [slug, title, body_md]; }
+    entity = 'page'; id = slug; before = previous; after = { slug, title, body_md };
   } else if (module === 'content') {
     const titleId = Number(text(form, 'id')), type = text(form, 'type');
     if (!Number.isSafeInteger(titleId) || !titleId || !['movie', 'tv'].includes(type)) throw new AdminError('Choose a valid title.');

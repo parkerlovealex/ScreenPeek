@@ -2,6 +2,7 @@ import { requirePermission } from './access.ts';
 import type { AdminIdentity, AdminModule } from './access.ts';
 import type { AdminEnvironment } from './changes.ts';
 import type { AdPage, AdPlacement } from '../ads.ts';
+import type { TrustDocument } from '../trust.ts';
 
 export interface AdminLink { slug: string; name: string; destination: string; type: string; enabled: number; rules: string; clicks_total: number; clicks_today: number; clicks_day: string | null; starts_at: string | null; ends_at: string | null; revision: number; }
 export interface AdminAd { page_type: AdPage; placement: AdPlacement; code: string; enabled: number; test_mode: number; starts_at: string | null; ends_at: string | null; revision: number; }
@@ -16,6 +17,7 @@ export async function adminData(env: AdminEnvironment, actor: AdminIdentity, mod
   const db = env.DB, query = (url.searchParams.get('q') || '').slice(0, 100), page = Math.min(100_000, Math.max(1, Number.parseInt(url.searchParams.get('page') || '1') || 1));
   let links: AdminLink[] = [], selectedLink: AdminLink | null = null, slots: AdminAd[] = [], titles: AdminTitle[] = [], sync: SyncRow[] = [], changes: HistoryRow[] = [], settings: SettingRow[] = [];
   let total = 0, pending = 0, catalogue: CatalogueMeters | null = null;
+  let documents: TrustDocument[] = [];
   if (module === 'links') {
     const where = 'name LIKE ? ESCAPE \'\\\' OR slug LIKE ? ESCAPE \'\\\'';
     const values = [like(query), like(query)];
@@ -32,6 +34,7 @@ export async function adminData(env: AdminEnvironment, actor: AdminIdentity, mod
     titles = (await db.prepare(`SELECT id,type,slug,title,pinned,hidden,revision FROM titles WHERE ${where} ORDER BY pinned DESC,popularity DESC,id,type LIMIT 50 OFFSET ?`).bind(like(query), (page - 1) * 50).all<AdminTitle>()).results;
   } else if (module === 'sync') sync = (await db.prepare('SELECT * FROM sync_log ORDER BY id DESC LIMIT 20').all<SyncRow>()).results;
   else if (module === 'settings') settings = (await db.prepare('SELECT key,value,revision FROM config ORDER BY key').all<SettingRow>()).results;
+  else if (module === 'pages') documents = (await db.prepare("SELECT * FROM pages WHERE slug IN('about','privacy','dmca','contact','404') ORDER BY slug").all<TrustDocument>()).results;
   else if (module === 'dashboard') {
     const day = new Date().toISOString().slice(0, 10);
     const [counts, history, logs, queued] = await Promise.all([
@@ -42,7 +45,7 @@ export async function adminData(env: AdminEnvironment, actor: AdminIdentity, mod
     ]);
     catalogue = counts; changes = history.results; sync = logs.results; pending = queued?.count || 0;
   }
-  return { links, selectedLink, slots, titles, sync, changes, settings, total, page, pages: Math.max(1, Math.ceil(total / 50)), query, pending, catalogue };
+  return { links, selectedLink, slots, titles, sync, changes, settings, documents, total, page, pages: Math.max(1, Math.ceil(total / 50)), query, pending, catalogue };
 }
 export type AdminData = Awaited<ReturnType<typeof adminData>>;
 export async function exportAdminBackup(env: AdminEnvironment, actor: AdminIdentity) {

@@ -30,12 +30,14 @@
     "test:redirects": "node scripts/tool.mjs node --test tests/redirects.test.ts",
     "test:votes": "node scripts/tool.mjs node --test tests/votes.test.ts",
     "test:ads": "node scripts/tool.mjs node --test tests/ads.test.ts",
-    "test:admin": "node scripts/tool.mjs node --test tests/admin.test.ts"
+    "test:admin": "node scripts/tool.mjs node --test tests/admin.test.ts",
+    "test:trust": "node scripts/tool.mjs node --test tests/trust.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
     "astro": "7.4.7",
     "aws4fetch": "1.0.20",
+    "micromark": "4.0.3",
     "sharp": "0.35.5"
   },
   "devDependencies": {

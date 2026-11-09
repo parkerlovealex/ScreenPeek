@@ -54,6 +54,8 @@ jobs:
         run: npm run test:ads
       - name: Access, admin permissions and audited transaction tests
         run: npm run test:admin
+      - name: Trust content and Markdown safety tests
+        run: npm run test:trust
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies

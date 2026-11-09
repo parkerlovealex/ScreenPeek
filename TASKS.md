@@ -20,7 +20,7 @@
 - [x] 1.17 `/api/vote` + My List/history (localStorage) + `/mylist/`
 - [x] 1.18 Ads: slot resolution from KV, popunder session cap, Social Bar global slot, preview-safe placeholders
 - [x] 1.19 Admin: Dashboard, Link Manager, Ad Manager, Content (pin/hide), Sync (status + run-now), Settings, Backup export
-- [ ] 1.20 Trust pages (About with TMDb attribution, Privacy, DMCA, Contact) + styled 404
+- [x] 1.20 Trust pages (About with TMDb attribution, Privacy, DMCA, Contact) + styled 404
 - [ ] 1.21 SEO: meta/OG/JSON-LD, dynamic sitemaps, robots.txt, noindex gating
 - [ ] 1.22 Deploy prep: `DEPLOY-CHECKLIST.md`, Cloudflare bindings wired, Phase 1 verification list run + reported
 - [ ] 1.23 Hybrid static tier: nightly workflow = sync → prerender hubs + top `static_top_n` titles → deploy; build fails if static files > 15,000
