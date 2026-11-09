@@ -198,3 +198,7 @@ Stored metadata produces the facts line, three visible Q&A answers, matching FAQ
 ## 1.29 — route policy
 
 Two route-policy tests pass against actual local Worker/D1: stored redirect returns 301 before rendering, owner-deleted title returns 410, and a styled unknown route is logged after a five-second approximate batch. Targets stay on the owned origin and exclude privileged/outbound routes; path logs exclude query strings and are bounded to 1000 stored paths / 40 pending paths. Static build excludes redirect source paths, so static changes apply on the next build as approved. Build and typecheck pass. Live CDN refresh remains deferred to deployment.
+
+## 1.30 — generated social cards
+
+Ten image tests and all 21 sync integration tests pass. The importer creates owned OG keys for 50 gated fixture titles, with no duplicate titles or unchanged-source image re-downloads on rerun. Encoded cards are 1200×630 WebP with immutable headers, escaped stored text, deterministic keys and current field-lock checks. Owned R2 posters are reused when metadata changes. One browser test verifies gated OG URL and dimension tags. Build/typecheck pass. Live R2 URLs and social crawler fetching remain deferred to deployment.

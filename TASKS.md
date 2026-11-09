@@ -31,7 +31,7 @@
 - [x] 1.27 Detail originality: facts line + Q&A block (+ FAQ schema) + "Updated" date; schema set WITHOUT third-party aggregateRating
 - [x] 1.28 Filter/sort URL control: noindex + canonical to clean URL (local routes verified; custom-domain edge rule deferred in VERIFICATION.md)
 - [x] 1.29 Redirects table honoured before render (301); owner-deleted titles → 410; 404s logged to `notfound_log`
-- [ ] 1.30 OG cards: sync composes 1200×630 for gated titles → R2 `og/`; detail OG tags wired
+- [x] 1.30 OG cards: sync composes 1200×630 for gated titles → R2 `og/`; detail OG tags wired
 - [ ] 1.31 Poster colour: sync extracts dominant colour; placeholders + detail tint; scroll-snap swipe rows (Trending, Cast)
 - [ ] 1.32 "Streaming on" logo strip on detail (first 3 + "+N more")
 - [ ] 1.33 Admin v2: cache purge on save (+ Dashboard retry), `admin_log` change history with Undo, duplicate ad-code warning, SEO tab (redirects, 404 log, overrides, verification values), Dashboard free-limit meter + Search Console/Lighthouse cards

@@ -53,6 +53,7 @@ export async function localBindings(root = '.wrangler/state') {
     },
   };
   const images: ImageStore = {
+    async get(key) { const object = await bucket.get(key); return object ? new Uint8Array(await object.arrayBuffer()) : null; },
     async head(key) { return Boolean(await bucket.head(key)); },
     async put(key, bytes, contentType, cacheControl) {
       await bucket.put(key, bytes, { httpMetadata: { contentType, cacheControl } });

@@ -1,3 +1,4 @@
+import { composeOg } from './og.ts';
 import type { TmdbClient } from './tmdb.ts';
 import type { Candidate, ExistingTitleState, SourcePerson } from './types.ts';
 import { titleKey } from './types.ts';
@@ -138,6 +139,13 @@ export async function runSync(options: {
         }
         const gallery = backdrop.keys['300'] ? [backdrop.keys['300']] : [];
         rowsWritten += (await persistTitle(db, data, { poster: poster.keys['185'] || null, backdrop: backdrop.keys['300'] || null, gallery }, { popularityGate: threshold })).rowsWritten;
+        const storedTitle = (await db.query<{ id: number; type: 'movie' | 'tv'; title: string; year: number | null; quality_gate: number; updated_at: string; locked_fields: string }>('SELECT id,type,title,year,quality_gate,updated_at,locked_fields FROM titles WHERE id=? AND type=? AND hidden=0 AND deleted=0 AND deleted_at IS NULL', [candidate.id, candidate.type]))[0];
+        if (storedTitle?.quality_gate && data.images.poster && !parseArray(storedTitle.locked_fields).some(field => ['og_r2','poster_r2'].includes(String(field)))) {
+          try {
+            const key = await composeOg(client, images, { id: storedTitle.id, type: storedTitle.type, title: storedTitle.title, year: storedTitle.year, posterPath: data.images.poster, posterKey: poster.keys['185'], siteName: config.site_name || 'ScreenPeek' });
+            await batch([{ sql: "UPDATE titles SET og_r2=? WHERE id=? AND type=? AND updated_at=? AND quality_gate=1 AND hidden=0 AND deleted=0 AND deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM json_each(locked_fields) WHERE value IN ('og_r2','poster_r2'))", params: [key, storedTitle.id, storedTitle.type, storedTitle.updated_at] }]);
+          } catch { warn(`${candidate.type}:${candidate.id}: sharing card generation failed.`); }
+        }
         for (const season of data.seasons) {
           if (season.episode_count < 1) continue;
           const stored = await db.query<{ count: number }>('SELECT COUNT(*) AS count FROM episodes WHERE title_id=? AND season_number=?', [candidate.id, season.season_number]);

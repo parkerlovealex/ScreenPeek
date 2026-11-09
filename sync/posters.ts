@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import type { TmdbClient } from './tmdb.ts';
 
 export interface ImageStore {
+  get?(key: string): Promise<Uint8Array | null>;
   head(key: string): Promise<boolean>;
   put(key: string, bytes: Uint8Array, contentType: string, cacheControl: string): Promise<void>;
 }

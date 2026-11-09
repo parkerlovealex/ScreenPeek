@@ -45,7 +45,7 @@ export class R2Store implements ImageStore {
     }
   }
 
-  private async request(method: 'HEAD' | 'PUT', key: string, body?: Uint8Array, headers?: HeadersInit) {
+  private async request(method: 'HEAD' | 'PUT' | 'GET', key: string, body?: Uint8Array, headers?: HeadersInit) {
     const url = this.objectUrl(key);
     try {
       // Sign explicitly so tests and the sync transport share the injected fetch.
@@ -60,6 +60,15 @@ export class R2Store implements ImageStore {
       // Network/provider errors can contain URLs or echo authentication headers.
       throw new Error(`R2 ${method} request failed before receiving a response`);
     }
+  }
+
+  async get(key: string): Promise<Uint8Array | null> {
+    const response = await this.request('GET', key);
+    if (response.status === 404) { await response.body?.cancel(); return null; }
+    if (!response.ok || Number(response.headers.get('content-length') || 0) > 10_000_000) { await response.body?.cancel(); throw new Error('R2 image read failed or exceeds its size bound'); }
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.length > 10_000_000) throw new Error('R2 image exceeds its size bound');
+    return bytes;
   }
 
   async head(key: string): Promise<boolean> {
