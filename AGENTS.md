@@ -1,5 +1,7 @@
 # AGENTS.md — Movie System (project brain)
 
+**Owner-approved update (2026-11-09):** hosting is now **Cloudflare Workers with static assets**, replacing Cloudflare Pages/Pages Functions. The owner approved this because maintained Astro adapters have removed Pages support and the legacy Pages stack has critical/high dependency advisories. Astro, TypeScript, D1, KV, R2, GitHub Actions, the static-first model and all numbered HARD RULES remain. Use current Workers deployment commands rather than the original Pages commands below or in the supplied docs. See `docs/DECISIONS.md` for the approved static-save behaviour.
+
 Read this first, every session. Full detail lives in `PRD.md` and `docs/`. Build order lives in `TASKS.md`. If any instruction conflicts, this file's HARD RULES win. (This is the Codex edition of the project brain — the rules are identical to the Claude Code edition; only the filename differs, because Codex reads `AGENTS.md` automatically.)
 
 ## What this project is
@@ -9,9 +11,9 @@ A legal, English, Tier-1 (US/UK/CA/AU) movie & TV **information** website whose 
 ## Stack (locked — do not substitute without asking the owner)
 
 - **Astro + TypeScript** (static-first, near-zero client JS)
-- **Cloudflare Pages** hosting + **Pages Functions** for the few dynamic endpoints
+- **Cloudflare Workers with static assets** hosting + Worker routes for the few dynamic endpoints (owner-approved migration)
 - **Cloudflare D1** (SQLite) = catalogue database · **KV** = config + links (fast edge reads) · **R2** = poster/backdrop storage (zero egress)
-- **GitHub Actions** = daily sync cron + CI. Repo push to `main` auto-deploys via Cloudflare Pages' GitHub integration.
+- **GitHub Actions** = daily sync cron + CI + Workers deployment workflow; deploy only when the owner has supplied the necessary account and credentials.
 - **Admin auth:** Cloudflare Access in front of `/admin`; app-level roles (Owner/Editor/Ads/Viewer) per `docs/ADMIN-PANEL.md`, which is the full admin spec (16 modules). Every admin mutation writes `admin_log` with the actor's Access email and purges cache on save.
 - No traditional backend/server. No WordPress. No Next.js.
 

@@ -1,7 +1,14 @@
 name = "screenpeek"
-pages_build_output_dir = "./dist"
-compatibility_date = "2026-11-09"
+main = "@astrojs/cloudflare/entrypoints/server"
+compatibility_date = "2026-11-08"
 compatibility_flags = ["nodejs_compat"]
+
+# Serve matching static files without invoking the Worker. The Astro adapter
+# writes the final entrypoint and asset directory into dist/server/wrangler.json.
+[assets]
+binding = "ASSETS"
+directory = "./dist/client"
+run_worker_first = false
 
 # Replace IDs with the resources you create; these are local-only placeholders.
 [[d1_databases]]
