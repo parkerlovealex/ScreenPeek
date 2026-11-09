@@ -136,3 +136,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Stored library text cannot inject HTML or unowned images. Saved-title grids paginate with real URLs at 24 cards; viewing history uses text rows to keep the page at most 24 poster cards. My List is noindex/no-store and contains no ads.
 - A browser test found a nullable TMDb vote-count crash on a sparse valid title; the ratings strip now shows an unavailable state. Complete browser rerun passes.
 - Typecheck: 120 files, 0 errors/warnings/hints. Build, source boundary check, Actionlint and diff whitespace check pass. Native binding regression tests: 3 passed after adding local KV support. No live cloud voting check is claimed.
+
+## 1.18 — configured ad placements and capped popunder admission
+
+- Native ad-resolution tests: 2 passed. Actual local D1/KV verify placement isolation, schedule bounds, unchanged snippet strings, disabled mirrors, authenticated-only test mode, master switch and cap hours. Platform ADS_ENABLED=0 skips ad storage entirely; watch/popunder is forbidden before any lookup.
+- Production browser suite: 29 passed. An isolated real Worker with ADS_ENABLED=1 renders a simulated snippet only in detail/native and a separate global Social Bar. Popunder code is inert until an eligible trusted click, admitted once across reloads and tabs, and skipped when cookies cannot be set, on an interstitial click, or on the Where-to-Watch action. Watch and My List contain no popunder code; My List has no ads. Real provider snippets/delivery remain unverified until the owner supplies them.
+- Preview query adtest=1 does not authorize scripts. Native and infeed are distinct list placements; infeed appears between the first 12 and remaining cards. No monetisation destination or provider code is in application source.
+- Typecheck: 126 files, 0 errors/warnings/hints. Build, source boundary check, Actionlint and whitespace check pass. After completing grouped-upcoming infeed handling, build and the 9 affected hub/ad browser tests passed again.
+- Local migration 002 adds authenticated test-mode state and an off-by-default admin master switch. Mirror keys are ad:<page>:<placement> and config:<key>; static HTML still refreshes only on build, as approved.

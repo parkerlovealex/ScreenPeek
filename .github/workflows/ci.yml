@@ -50,6 +50,8 @@ jobs:
         run: npm run test:redirects
       - name: Verdict and daily vote guard tests
         run: npm run test:votes
+      - name: Ad resolution and preview safety tests
+        run: npm run test:ads
       - name: Build Workers application
         run: npm run build
       - name: Install Chromium and system dependencies

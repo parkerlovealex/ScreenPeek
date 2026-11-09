@@ -26,14 +26,14 @@ const categories = [
     <section class="catalogue-section" aria-labelledby="trending-title"><div class="section-heading"><div><p class="eyebrow">IN THE SPOTLIGHT</p><h2 id="trending-title">Trending now</h2></div><a class="section-more" href="/top10/">Top 10 →</a></div>
       {catalogue.trending.length ? <div class="poster-row">{catalogue.trending.map((title, index) => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} eager={index < 3} />)}</div> : <p class="quiet-empty">New titles will appear after the next catalogue update.</p>}
     </section>
-    <AdSlot placement="top_300x250" />
+    <AdSlot pageType="home" placement="top_300x250" />
     <section class="catalogue-section" aria-labelledby="top10-title"><div class="section-heading"><div><p class="eyebrow">THE MOST POPULAR</p><h2 id="top10-title">Top 10 this week</h2></div><a class="section-more" href="/top10/">See all →</a></div>
       {catalogue.top10.length ? <ol class="ranked-list">{catalogue.top10.map((title, index) => <li><a href={titleUrl(title)}><span class="rank-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span class="rank-title"><strong>{title.title}</strong><small>{title.year ?? 'Year TBA'} · {title.type === 'movie' ? 'Movie' : 'TV series'}</small></span><span class="rank-score" title="TMDb rating">{rating(title.vote_average)}</span></a></li>)}</ol> : <p class="quiet-empty">The weekly list is waiting for its first titles.</p>}
     </section>
     <section class="catalogue-section" aria-labelledby="movies-title"><div class="section-heading"><h2 id="movies-title">Latest movies</h2><a class="section-more" href="/movies/">All movies →</a></div>
       {catalogue.movies.length ? <div class="poster-grid">{catalogue.movies.map(title => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} />)}</div> : <p class="quiet-empty">New movies will appear here.</p>}
     </section>
-    <AdSlot placement="native" />
+    <AdSlot pageType="home" placement="native" />
     <section class="catalogue-section" aria-labelledby="series-title"><div class="section-heading"><h2 id="series-title">Latest series</h2><a class="section-more" href="/series/">All series →</a></div>
       {catalogue.series.length ? <div class="poster-grid">{catalogue.series.map(title => <PosterCard title={title} mediaBase={env.R2_PUBLIC_BASE} />)}</div> : <p class="quiet-empty">New series will appear here.</p>}
     </section>

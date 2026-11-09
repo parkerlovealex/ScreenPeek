@@ -1,6 +1,7 @@
 ---
 import '../styles/site.css';
 import AdSlot from '../components/AdSlot.astro';
+import Popunder from '../components/Popunder.astro';
 interface Props {
   title: string; description?: string; noindex?: boolean; sample?: boolean;
   pageType?: 'home' | 'list' | 'detail' | 'cast' | 'watch' | 'trailer' | 'search' | 'utility';
@@ -50,7 +51,8 @@ const { title, description = 'Discover movies and TV shows, cast, trailers and l
         This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
       <p>ScreenPeek provides movie and TV information. No videos are hosted here.</p>
     </footer>
-    {pageType !== 'utility' && <AdSlot placement="sticky_320x50" />}
+    {pageType !== 'utility' && <><AdSlot pageType={pageType} placement="sticky_320x50" /><AdSlot pageType="global" placement="social_bar" /></>}
+    {pageType === 'detail' && <Popunder />}
     <script>
       import '../scripts/search';
       import '../scripts/library';

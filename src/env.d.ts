@@ -15,5 +15,8 @@ declare namespace Cloudflare {
 }
 type Runtime = import('@astrojs/cloudflare').Runtime;
 declare namespace App {
-  interface Locals extends Runtime {}
+  interface Locals extends Runtime {
+    ads?: ReturnType<typeof import('./lib/ads').createAdResolver>;
+    adTestAuthorized?: boolean;
+  }
 }
