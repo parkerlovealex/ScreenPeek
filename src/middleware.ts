@@ -1,7 +1,8 @@
+import { storedRedirect, recordNotFound } from './lib/route-policy';
 import { cachedCatalogue } from './lib/catalogue-cache';
 import { cachedWatch } from './lib/watch-cache';
 import { defineMiddleware } from 'astro:middleware';
-import { env } from 'cloudflare:workers';
+import { env, waitUntil } from 'cloudflare:workers';
 import { authenticateAdmin, AdminError, permitted } from './lib/admin/access';
 import { readConfig } from './lib/ads';
 
@@ -9,6 +10,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   let path = context.url.pathname;
   try { path = decodeURIComponent(path); } catch { /* Invalid paths stay unprivileged. */ }
   const admin = path === '/admin' || path.startsWith('/admin/');
+  const publicPage = !admin && !/^\/(?:api|go)(?:\/|$)/.test(path);
+  if (publicPage && ['GET', 'HEAD'].includes(context.request.method)) {
+    try { const target = await storedRedirect(env.DB, context.url.pathname, context.url.origin); if (target) return new Response(null, { status: 301, headers: { Location: target, 'Cache-Control': 'public, max-age=300' } }); } catch { /* Normal rendering handles database failures. */ }
+  }
   const adTest = context.url.searchParams.get('adtest') === '1';
   if (!admin && path !== '/maintenance/') {
     let maintenance = false;
@@ -38,5 +43,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     response.headers.set('X-Content-Type-Options', 'nosniff');
     if (admin) response.headers.set('Content-Security-Policy', "frame-ancestors 'none'");
   }
+  if (publicPage && context.request.method === 'GET' && response.status === 404) waitUntil(recordNotFound(env.DB, context.url.pathname));
   return response;
 });

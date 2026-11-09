@@ -59,7 +59,7 @@ export async function snapshotCatalogue(source: SqlClient, target: Awaited<Retur
     await copyRows(source, target.db, 'seasons', '*', "title_id IN (SELECT json_extract(value,'$[0]') FROM json_each(?) WHERE json_extract(value,'$[1]')='tv')", [pairs], 100_000);
     await copyRows(source, target.db, 'people', '*', `id IN (SELECT person_id FROM credits WHERE ${parents})`, [pairs], 100_000);
   }
-  for (const table of ['genres', 'collections', 'languages', 'taxonomy_overrides', 'seo_overrides', 'config', 'links', 'ad_slots', 'pages']) await copyRows(source, target.db, table, '*', '1', [], 15_000);
+  for (const table of ['genres', 'collections', 'languages', 'taxonomy_overrides', 'seo_overrides', 'config', 'links', 'ad_slots', 'pages', 'redirects']) await copyRows(source, target.db, table, '*', '1', [], 15_000);
   await copyRows(source, target.db, 'collection_titles', '*', `EXISTS(SELECT 1 FROM titles t WHERE t.id=collection_titles.title_id AND t.type=collection_titles.title_type AND ${visible}${sample ? '' : ' AND quality_gate=1'})`, [], 1_000_000);
   await target.db.batch([{ sql: "INSERT OR IGNORE INTO title_genres(title_id,title_type,genre_slug) SELECT t.id,t.type,j.value FROM titles t,json_each(t.genres) j WHERE j.type='text'" }]);
   const paths = ['/', '/movies/', '/series/', '/new/', '/top10/', '/upcoming/', '/about/', '/privacy/', '/dmca/', '/contact/'];
@@ -76,8 +76,9 @@ export async function snapshotCatalogue(source: SqlClient, target: Awaited<Retur
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Invalid title slug in static inventory');
     paths.push(`/${row.type === 'tv' ? 'tv' : 'movie'}/${slug}/`);
   }
+  const redirected = new Set((await target.db.query('SELECT from_path FROM redirects WHERE type=301')).map(row => String(row.from_path)));
   const maintenance = (await source.query("SELECT value FROM config WHERE key='maintenance'"))[0]?.value === '1';
-  return { paths: maintenance ? [] : [...new Set(paths)], sample, topN, selected: top.length, cards };
+  return { paths: maintenance ? [] : [...new Set(paths)].filter(path => !redirected.has(path)), sample, topN, selected: top.length, cards };
 }
 export async function renderStatic(options: { state: string; paths: string[]; client?: string; config?: string; vars?: Record<string, string>; port?: number }) {
   const client = resolve(options.client || 'dist/client');

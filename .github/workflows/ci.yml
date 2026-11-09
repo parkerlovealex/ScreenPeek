@@ -62,6 +62,8 @@ jobs:
         run: npm run test:deploy
       - name: Build Workers application
         run: npm run build
+      - name: Verify public redirect, removal and 404 policy
+        run: node scripts/tool.mjs node --test tests/route-policy.test.ts
       - name: Verify static bypass, long-tail and country cache behaviour
         run: npm run test:static
       - name: Install Chromium and system dependencies
