@@ -16,7 +16,8 @@
     "db:seed": "node scripts/seed-local.mjs",
     "db:setup": "npm run db:schema && npm run db:seed",
     "db:remove-seed": "node scripts/tool.mjs wrangler d1 execute movie-db --local --persist-to .wrangler/state --file=db/remove-seed.sql",
-    "test:database": "node --test tests/database.test.mjs"
+    "test:database": "node --test tests/database.test.mjs",
+    "test:tmdb": "node --test tests/tmdb.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",
