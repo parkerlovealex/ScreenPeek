@@ -31,3 +31,7 @@ The owner approved a small image visibility observer as an exception to the allo
 | Watch | 23.93 KB | Not targeted | Not targeted |
 
 The Movies template previously transferred 140.65 KB. The gate now passes every measured template. The deliberately oversized real detail still fails with a nonzero exit status, confirmed by the negative test. All 38 browser regressions, the image-loading check, the deliberate-bloat test, typecheck and workflow syntax checks pass. Reports are generated locally under `.cache/performance/`; the configured hosted CI has not been run.
+
+## Task 1.25 navigation verification
+
+Inline document speculation rules select only owned title cards, with conservative press/tap intent. Supporting browsers may prefetch; other browsers retain normal navigation. Watch and utility pages omit the rules. The CSS fade starts at 0.9 opacity and respects reduced motion. No client JavaScript file was added. Chromium accepted the rules without parser errors, reduced-motion animation was absent, and seven catalogue/detail browser regressions passed. Measured first-screen transfers are 46.27 / 68.53 / 46.28 / 24.00 KB (home/detail/list/watch); Lighthouse mobile is 100/100 on all three targeted templates with CLS 0.

@@ -35,3 +35,5 @@
 .poster-frame{content-visibility:auto}
 
 img[data-lazy-src]{visibility:hidden}.poster-frame:has(>img[data-lazy-src]){aspect-ratio:185/278}
+
+@media(prefers-reduced-motion:no-preference){#content{animation:content-in .16s ease-out}}@keyframes content-in{from{opacity:.9}to{opacity:1}}
