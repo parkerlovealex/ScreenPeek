@@ -4,6 +4,8 @@ import PosterCard from './PosterCard.astro';
 import Pagination from './Pagination.astro';
 import AdSlot from './AdSlot.astro';
 import type { SearchPageData } from '../lib/search';
+import { itemListSchema, siteOrigin } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: SearchPageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { filters, catalogue, options } = data;
@@ -16,7 +18,7 @@ firstPage.delete('page');
 const ratings = [...new Set([6, 7, 8, 9, ...(filters.minRating === undefined ? [] : [filters.minRating])])].sort((a, b) => a - b);
 ---
 <Base title={pageTitle} description="Search the movie and TV catalogue by title, genre, year and TMDb rating."
-  sample={data.sample} noindex={true} pageType={available ? 'search' : 'utility'}>
+  sample={data.sample} noindex={true} pageType={available ? 'search' : 'utility'} schemas={available && catalogue.titles.length ? [itemListSchema(catalogue.titles, siteOrigin(env.SITE_URL), catalogue.page)] : []}>
   <article data-search-page>
     <header class="page-heading"><a class="back-link" href="/">← Home</a><h1>Search movies & series</h1><p>Find a title, then explore its story, cast and watch options.</p></header>
     <form class="catalogue-filters search-filters" action="/search/" method="get" aria-label="Search filters">

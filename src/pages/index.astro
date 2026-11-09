@@ -5,6 +5,7 @@ import PosterCard from '../components/PosterCard.astro';
 import { env } from 'cloudflare:workers';
 import { sampleMode, homeTitles, titleUrl } from '../lib/catalogue';
 import { rating } from '../lib/format';
+import { itemListSchema, siteOrigin } from '../lib/seo';
 let sample = false, failed = false;
 let catalogue: Awaited<ReturnType<typeof homeTitles>> = { trending: [], top10: [], movies: [], series: [], upcoming: [], genres: [] };
 try { sample = await sampleMode(env.DB); catalogue = await homeTitles(env.DB, sample); } catch { failed = true; Astro.response.status = 503; }
@@ -16,7 +17,7 @@ const categories = [
   { href: '/upcoming/', name: 'Upcoming', description: 'What is coming next', mark: '04' },
 ];
 ---
-<Base title="Discover movies & TV" sample={sample} noindex={sample || failed} pageType={failed ? 'utility' : 'home'}>
+<Base title="Discover movies & TV" sample={sample} noindex={sample || failed} pageType={failed ? 'utility' : 'home'} schemas={failed ? [] : [itemListSchema(catalogue.trending, siteOrigin(env.SITE_URL))]}>
   <section class="intro"><p class="eyebrow">MOVIES & TV, EXPLAINED</p>
     <h1>Your next watch starts here.</h1>
     <p>Explore stories, meet the cast, and find legal ways to watch.</p>

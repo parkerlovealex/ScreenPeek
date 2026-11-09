@@ -31,7 +31,8 @@
     "test:votes": "node scripts/tool.mjs node --test tests/votes.test.ts",
     "test:ads": "node scripts/tool.mjs node --test tests/ads.test.ts",
     "test:admin": "node scripts/tool.mjs node --test tests/admin.test.ts",
-    "test:trust": "node scripts/tool.mjs node --test tests/trust.test.ts"
+    "test:trust": "node scripts/tool.mjs node --test tests/trust.test.ts",
+    "test:seo": "node scripts/tool.mjs node --test tests/seo.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.6",

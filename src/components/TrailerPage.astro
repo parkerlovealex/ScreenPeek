@@ -4,6 +4,8 @@ import AdSlot from './AdSlot.astro';
 import PosterCard from './PosterCard.astro';
 import type { TrailerPageData } from '../lib/trailer';
 import { mediaUrl } from '../lib/media';
+import { siteOrigin, trailerSchema } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: TrailerPageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { title } = data;
@@ -17,7 +19,7 @@ const errorHeading = data.status === 410 ? 'This title has been removed.' : data
 const overview = title?.overview?.trim() || '';
 ---
 <Base title={pageTitle} description={available && overview ? overview.slice(0, 155) : undefined}
-  sample={data.sample} noindex={data.noindex} pageType={available ? 'trailer' : 'utility'}>
+  sample={data.sample} noindex={data.noindex} pageType={available ? 'trailer' : 'utility'} schemas={trailerSchema(data, siteOrigin(env.SITE_URL), mediaBase)} ogImage={available ? poster : null}>
   {!available || !title ? <section class="empty-state"><p class="eyebrow">{data.status === 503 ? 'CATALOGUE' : `${data.status} · ${data.status === 410 ? 'REMOVED' : 'NOT FOUND'}`}</p><h1>{errorHeading}</h1><p>{data.status === 503 ? 'Please try again shortly.' : 'Explore the catalogue to find another movie or series.'}</p><a class="button primary" href="/">Go home</a></section> : <article data-trailer-page>
     <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href={title.type === 'tv' ? '/series/' : '/movies/'}>{title.type === 'tv' ? 'Series' : 'Movies'}</a><span aria-hidden="true">/</span><a href={detailUrl}>{title.title}</a><span aria-hidden="true">/</span><span aria-current="page">Trailer</span></nav>
     <header class="page-heading"><p class="eyebrow">TRAILER</p><h1>{title.title} trailer</h1><p>{title.year ?? 'Year TBA'} · {title.type === 'tv' ? 'TV series' : 'Movie'}</p></header>

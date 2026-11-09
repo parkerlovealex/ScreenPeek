@@ -28,3 +28,4 @@ bucket_name = "posters"
 [vars]
 SITE_NAME = "ScreenPeek"
 ADS_ENABLED = "0"
+DEPLOYMENT_ENV = "preview"

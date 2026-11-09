@@ -4,12 +4,14 @@ import PosterCard from './PosterCard.astro';
 import Pagination from './Pagination.astro';
 import AdSlot from './AdSlot.astro';
 import type { CataloguePageData } from '../lib/catalogue-page';
+import { itemListSchema, siteOrigin } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: CataloguePageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { type, label, filters, catalogue, options, sample, failed, missing, filtered, pageTitle } = data;
 ---
 <Base title={pageTitle} description={`Browse ${type === 'movie' ? 'movies' : 'TV series'} by genre, year and TMDb rating. Find cast, trailers and legal ways to watch.`}
-  sample={sample} noindex={sample || filtered || failed || missing} pageType={failed || missing ? 'utility' : 'list'}>
+  sample={sample} noindex={sample || filtered || failed || missing} pageType={failed || missing ? 'utility' : 'list'} pageNumber={catalogue.page} schemas={failed || missing ? [] : [itemListSchema(catalogue.titles, siteOrigin(env.SITE_URL), catalogue.page)]}>
   {failed ? <section class="empty-state"><p class="eyebrow">CATALOGUE</p><h1>The catalogue is temporarily unavailable.</h1><p>Please try again shortly.</p><a class="button" href="/">Go home</a></section> : missing ?
     <section class="empty-state"><p class="eyebrow">404 · PAGE NOT FOUND</p><h1>That page is beyond the catalogue.</h1><p>There {catalogue.pages === 1 ? 'is 1 page' : `are ${catalogue.pages} pages`} of matching titles.</p><a class="button primary" href={Astro.url.pathname}>Back to {label.toLowerCase()}</a></section> : <>
     <header class="page-heading"><a class="back-link" href="/">← Home</a><h1>{label}</h1><p>Find a story that fits. Filter the catalogue below.</p></header>

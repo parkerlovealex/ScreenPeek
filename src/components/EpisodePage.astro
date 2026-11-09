@@ -4,6 +4,8 @@ import AdSlot from './AdSlot.astro';
 import { seasonPath, episodePath } from '../lib/seasons';
 import type { EpisodePageData } from '../lib/seasons';
 import { mediaUrl } from '../lib/media';
+import { episodeSchema, siteOrigin } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: EpisodePageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { title, season, episode } = data;
@@ -20,7 +22,7 @@ const airDate = episode?.air_date && Number.isFinite(Date.parse(episode.air_date
   new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(episode.air_date)) : null;
 ---
 <Base title={pageTitle} description={available && episode?.overview ? episode.overview.slice(0, 155) : undefined}
-  sample={data.sample} noindex={data.noindex} pageType={available ? 'list' : 'utility'}>
+  sample={data.sample} noindex={data.noindex} pageType={available ? 'list' : 'utility'} schemas={episodeSchema(data, siteOrigin(env.SITE_URL), mediaBase)} ogImage={available ? still : null}>
   {!available || !title || !season || !episode ? <section class="empty-state"><p class="eyebrow">{data.status === 503 ? 'CATALOGUE' : `${data.status} · ${data.status === 410 ? 'REMOVED' : 'NOT FOUND'}`}</p><h1>{errorHeading}</h1><p>{data.status === 503 ? 'Please try again shortly.' : 'Explore the catalogue to find another series.'}</p><a class="button primary" href="/">Go home</a></section> : <article data-episode-page>
     <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/series/">Series</a><span aria-hidden="true">/</span><a href={seriesUrl}>{title.title}</a><span aria-hidden="true">/</span><a href={seasonUrl}>{seasonName}</a><span aria-hidden="true">/</span><span aria-current="page">Episode {episode.episode_number}</span></nav>
     <header class="page-heading"><p class="eyebrow">SEASON {season.season_number} · EPISODE {episode.episode_number}</p><h1>{episodeName}</h1><p><a href={seriesUrl}>{title.title}</a>{airDate ? <> · <time datetime={episode.air_date!}>{airDate}</time></> : ' · Air date to be announced'}</p></header>

@@ -5,6 +5,7 @@ interface ScreenPeekBindings {
   POSTERS: R2Bucket;
   SITE_NAME?: string;
   SITE_URL?: string;
+  DEPLOYMENT_ENV?: string;
   ADS_ENABLED?: string;
   CF_ACCESS_TEAM_DOMAIN?: string;
   CF_ACCESS_AUD?: string;

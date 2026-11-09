@@ -7,6 +7,8 @@ import type { HubKind, HubPageData } from '../lib/hubs';
 import { titleUrl } from '../lib/catalogue';
 import type { TitleCard } from '../lib/catalogue';
 import { rating } from '../lib/format';
+import { itemListSchema, siteOrigin } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: HubPageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const available = data.status === 200;
@@ -31,7 +33,7 @@ if (data.kind === 'upcoming') for (const title of data.catalogue.titles) {
 const grouped = [...months.values()];
 ---
 <Base title={data.title} description={available ? intro.slice(0, 155) : undefined}
-  sample={data.sample} noindex={data.noindex} pageType={available ? 'list' : 'utility'}>
+  sample={data.sample} noindex={data.noindex} pageType={available ? 'list' : 'utility'} pageNumber={data.catalogue.page} schemas={available ? [itemListSchema(data.catalogue.titles, siteOrigin(env.SITE_URL), data.catalogue.page)] : []}>
   {!available ? <section class="empty-state"><p class="eyebrow">{data.status === 503 ? 'CATALOGUE' : '404 · NOT FOUND'}</p><h1>{data.status === 503 ? 'The catalogue is temporarily unavailable.' : 'This collection or page could not be found.'}</h1><p>{data.status === 503 ? 'Please try again shortly.' : 'Explore the catalogue to find another movie or series.'}</p><a class="button primary" href="/">Go home</a></section> : <article data-hub-page={data.kind}>
     <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">{data.name}</span></nav>
     <header class="page-heading hub-heading"><p class="eyebrow">{labels[data.kind]}</p><h1>{data.name}</h1><p>{intro}</p></header>

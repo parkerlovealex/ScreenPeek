@@ -7,6 +7,8 @@ import VerdictWidget from './VerdictWidget.astro';
 import { parseJsonArray } from '../lib/detail';
 import type { TitlePageData } from '../lib/detail';
 import { mediaUrl } from '../lib/media';
+import { siteOrigin, titleSchema } from '../lib/seo';
+import { env } from 'cloudflare:workers';
 interface Props { data: TitlePageData; mediaBase?: string; }
 const { data, mediaBase } = Astro.props;
 const { title } = data;
@@ -38,7 +40,8 @@ const gallery = parseJsonArray<string>(title?.gallery_r2).filter(key => typeof k
   .slice(0, 6).map(key => mediaUrl(key, mediaBase)).filter((url): url is string => url !== null);
 ---
 <Base title={pageTitle} description={available && overview ? overview.slice(0, 155) : undefined}
-  sample={data.sample} noindex={data.noindex} pageType={available ? 'detail' : 'utility'}>
+  sample={data.sample} noindex={data.noindex} pageType={available ? 'detail' : 'utility'} schemas={titleSchema(data, siteOrigin(env.SITE_URL), mediaBase)}
+  ogType={available ? title?.type === 'tv' ? 'video.tv_show' : 'video.movie' : 'website'} ogImage={available ? mediaUrl(title?.quality_gate ? title.og_r2 : null, mediaBase) || poster : null}>
   {!available || !title ? <section class="empty-state"><p class="eyebrow">{data.status === 503 ? 'CATALOGUE' : `${data.status} · ${data.status === 410 ? 'REMOVED' : 'NOT FOUND'}`}</p><h1>{errorHeading}</h1>
     <p>{data.status === 503 ? 'Please try again shortly.' : 'Explore the catalogue to find another movie or series.'}</p><a class="button primary" href="/">Go home</a></section> :
     <article data-title-detail data-title-record data-title-id={title.id} data-title-type={title.type} data-slug={title.slug} data-title={title.title} data-year={title.year ?? ''} data-poster={savedPoster || ''}>

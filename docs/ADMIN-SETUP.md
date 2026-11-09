@@ -12,6 +12,8 @@ Before enabling live admin access:
 
 Keep `ADS_ENABLED=0` on previews. Live ads additionally require the admin master switch and each slot switch. Authenticated test-mode slots need `?adtest=1` on an Access-protected preview; a query flag alone never authorizes them. Static pages pick up changes only on their next build, as approved by the owner.
 
+Search indexing also requires `DEPLOYMENT_ENV=production` and the real canonical `SITE_URL`. Keep deployment mode `preview` elsewhere: previews emit noindex metadata, empty sitemaps, and a disallow-all robots file. An ad flag does not control indexing.
+
 Configuration exports contain ad code and destinations. Keep the downloaded file private. This export covers configuration and content overrides, not the full catalogue or image bucket; full backups are task 1.34.
 
 Local verification generates RSA keys at test runtime, returns simulated Access certificates in an isolated Worker wrapper, and exercises the unchanged production signature verifier. These credentials and external-response fixtures are never part of a deployed build.
