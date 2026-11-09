@@ -36,7 +36,7 @@
 - [x] 1.32 "Streaming on" logo strip on detail (first 3 + "+N more")
 - [x] 1.33 Admin v2: cache purge on save (+ Dashboard retry), `admin_log` change history with Undo, duplicate ad-code warning, SEO tab (redirects, 404 log, overrides, verification values), Dashboard free-limit meter + Search Console/Lighthouse cards
 - [x] 1.34 `backup.yml`: daily D1 + config export to R2 `backups/` (keep 14)
-- [ ] 1.35 Admin universal powers (ADMIN-PANEL §A): search/filter/sort/CSV, bulk edit, soft-delete → Trash (30-day, restore, "used in N places"), scheduling on links/ads/pins, actor-stamped history
+- [x] 1.35 Admin universal powers (ADMIN-PANEL §A): search/filter/sort/CSV, bulk edit, soft-delete → Trash (30-day, restore, "used in N places"), scheduling on links/ads/pins, actor-stamped history
 - [ ] 1.36 Not-working report (core checks: sync failures, missing poster/overview, empty/duplicate slots, visited 404s, quota > 80%) with Fix deep links
 - [ ] 1.37 Titles & People editor core: field edit + locks vs sync, pin/hide/delete (+ blocklist), re-fetch/import by TMDb ID via workflow dispatch, reset votes
 - [ ] 1.38 Admin Tools module: global search, preview-as-visitor (country cookie + device frame), run-any-job buttons; Settings & Health: secrets set/not-set panel, cache TTL settings

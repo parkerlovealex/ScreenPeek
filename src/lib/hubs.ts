@@ -12,8 +12,8 @@ export async function loadHubPage(db: D1Database, kind: HubKind, url: URL, slug?
     sample = await sampleMode(db);
     const filters: ListFilters = { page: catalogue.page, includeUngated: sample };
     if (kind === 'genre' || kind === 'collection' || kind === 'language') {
-      const row = await db.prepare(`SELECT name FROM ${lookupTables[kind]} WHERE slug=?`).bind(slug || '').first<{ name: string }>();
-      const override = await db.prepare('SELECT display_name,intro,hidden FROM taxonomy_overrides WHERE kind=? AND slug=?').bind(kind, slug || '').first<{ display_name: string | null; intro: string | null; hidden: number }>();
+      const row = await db.prepare(`SELECT name FROM ${lookupTables[kind]} WHERE slug=? ${kind === 'collection' ? "AND deleted_at IS NULL AND (starts_at IS NULL OR datetime(starts_at)<=datetime('now')) AND (ends_at IS NULL OR datetime(ends_at)>datetime('now'))" : ''}`).bind(slug || '').first<{ name: string }>();
+      const override = await db.prepare('SELECT display_name,intro,hidden FROM taxonomy_overrides WHERE kind=? AND slug=? AND deleted_at IS NULL').bind(kind, slug || '').first<{ display_name: string | null; intro: string | null; hidden: number }>();
       found = Boolean(row) && !override?.hidden;
       name = override?.display_name || row?.name || '';
       if (kind === 'language' && !override?.display_name && name === slug) {

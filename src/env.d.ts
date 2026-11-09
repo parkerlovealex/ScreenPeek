@@ -3,6 +3,7 @@ interface ScreenPeekBindings {
   DB: D1Database;
   CONFIG: KVNamespace;
   POSTERS: R2Bucket;
+  BACKUPS?: R2Bucket;
   SITE_NAME?: string;
   SITE_URL?: string;
   DEPLOYMENT_ENV?: string;

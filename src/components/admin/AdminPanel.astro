@@ -1,4 +1,6 @@
 ---
+import BackupSnapshots from './BackupSnapshots.astro';
+import UniversalList from './UniversalList.astro';
 import AdminAdvanced from './AdminAdvanced.astro';
 import Base from '../../layouts/Base.astro';
 import { permitted } from '../../lib/admin/access';
@@ -25,6 +27,7 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
   {error && <p class="notice admin-error" role="alert">{error}</p>}
   {message && <p class="notice" role="status">{message}{jobUrl && <> <a href={jobUrl} rel="noreferrer">Check the workflow →</a></>}</p>}
   {actor && data && <>
+    {!error && ['links','ads','content','pages','sync','seo','changes','titles','people'].includes(module) && <UniversalList actor={actor} module={module} />}
     {['dashboard','seo','changes'].includes(module) && <AdminAdvanced module={module} actor={actor} />}
     {module === 'dashboard' && <>
       <div class="admin-meters"><section><h2>Catalogue</h2><p><strong>{data.catalogue?.titles.toLocaleString() || 0}</strong> titles · {data.catalogue?.gated.toLocaleString() || 0} index-ready</p><p>{data.catalogue?.people.toLocaleString() || 0} people</p></section><section><h2>Approx. clicks today</h2><p class="admin-big">≈ {data.catalogue?.clicks.toLocaleString() || 0}</p><small>UTC reporting day · best-effort totals</small></section><section><h2>Last sync</h2><p>{data.sync[0]?.status || 'No sync recorded'}</p>{data.sync[0] && <small>{date(data.sync[0].started_at)} · Bangladesh time</small>}</section><section><h2>Delivery health</h2><p>{data.pending ? `${data.pending} changes await propagation or purge.` : 'No pending delivery records.'}</p><a href="https://dash.cloudflare.com/" rel="noreferrer">Check Cloudflare quotas →</a><p>Quota and revenue numbers are not connected.</p></section></div>
@@ -70,7 +73,8 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
       const setting = settingValue(key);
       return <form class="admin-form" method="post"><input type="hidden" name="key" value={key} /><input type="hidden" name="revision" value={setting?.revision ?? -1} /><fieldset disabled={!canWrite}><label>{label}<input name="value" value={submitted?.get('key') === key ? submitted.get('value') || '' : setting?.value || (key === 'site_name' ? 'ScreenPeek' : '')} maxlength="250" aria-describedby={`setting-help-${key}`} /></label><small id={`setting-help-${key}`}>{['ads_enabled', 'maintenance', 'ratings_external'].includes(key) ? '0 = off · 1 = on' : key === 'popunder_cap_hours' ? '1–168 hours · default 24' : key === 'sync_max_titles' ? '1–2000; the nightly workflow applies this limit.' : 'Static pages apply changes at the next build.'}</small><button type="submit">Save {label.toLowerCase()}</button></fieldset></form>;
     })}</div><section class="catalogue-section"><h2>Worker configuration status</h2><dl class="title-facts">{secrets.map(secret => <div><dt>{secret.name}</dt><dd>{secret.set ? 'Set ✓' : 'Not set'}</dd></div>)}</dl><p>Sync-only source and R2 S3 credentials belong in GitHub Actions; their status is not visible to this Worker.</p></section></>}
-    {module === 'backup' && <section class="empty-state"><h2>Export site configuration</h2><p>The JSON contains ad codes and destinations. Store it privately. It contains configuration and content overrides; it does not contain the full catalogue or R2 objects.</p><a class="button primary" href="?download=1">Download configuration JSON</a></section>}
+    {module==='backup' && <BackupSnapshots />}
+    {module === 'backup' && <section class="empty-state"><h2>Export site configuration</h2><p>The JSON contains ad codes and destinations. Store it privately. It contains configuration and content overrides; it does not contain the full catalogue or R2 objects.</p><a class="button primary" href="?download=1">Download configuration JSON</a><form class="admin-form" method="post" enctype="multipart/form-data"><label>Configuration export<input type="file" name="backup_file" accept="application/json,.json" required /></label><label>Type RESTORE to replace configuration<input name="confirm_restore" required pattern="RESTORE" /></label><p>A private pre-restore snapshot must succeed before any configuration is replaced.</p><button>Restore configuration</button></form></section>}
     {module === 'pages' && <>
       <nav class="hub-navigation" aria-label="Information pages">{data.documents.map(document => <a href={`?edit=${document.slug}`}>{document.title}</a>)}</nav>
       {data.documents.filter(document => document.slug === (Astro.url.searchParams.get('edit') || 'about')).map(document => <section class="catalogue-section"><h2>Edit {document.title}</h2><form class="admin-form" method="post"><input type="hidden" name="slug" value={document.slug} /><input type="hidden" name="revision" value={document.revision} /><fieldset disabled={!canWrite}>

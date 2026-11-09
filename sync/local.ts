@@ -26,6 +26,7 @@ export async function localBindings(root = '.wrangler/state') {
           DB: { type: 'd1', id: '00000000-0000-0000-0000-000000000001' },
           CONFIG: { type: 'kv', id: '00000000000000000000000000000001' },
           POSTERS: { type: 'r2', name: 'posters' },
+          BACKUPS: { type: 'r2', name: 'screenpeek-private-backups-local' },
         },
       },
     }],
@@ -52,6 +53,7 @@ export async function localBindings(root = '.wrangler/state') {
       return { rowsWritten: results.reduce((sum, result) => sum + (result.meta.rows_written || 0), 0) };
     },
   };
+  const backups = await runtime.getR2Bucket('BACKUPS');
   const images: ImageStore = {
     async get(key) { const object = await bucket.get(key); return object ? new Uint8Array(await object.arrayBuffer()) : null; },
     async head(key) { return Boolean(await bucket.head(key)); },
@@ -59,7 +61,7 @@ export async function localBindings(root = '.wrangler/state') {
       await bucket.put(key, bytes, { httpMetadata: { contentType, cacheControl } });
     },
   };
-  return { db, database, images, bucket, config, dispose: () => runtime.dispose() };
+  return { db, database, images, bucket, config, backups, dispose: () => runtime.dispose() };
 }
 
 /** D1 exec splits on newlines; Wrangler's parser preserves multiline SQL/quotes. */
@@ -69,4 +71,10 @@ export async function applyLocalSql(
 ) {
   const statements = unstable_splitSqlQuery(sql);
   if (statements.length) await database.batch(statements.map(statement => database.prepare(statement)));
+}
+
+/** Apply the current additive application migrations to an initialized local D1. */
+export async function applyLocalMigrations(database: Awaited<ReturnType<Miniflare['getD1Database']>>) {
+  const { readFile, readdir } = await import('node:fs/promises');
+  for (const file of (await readdir('db/migrations')).filter(name => name.endsWith('.sql')).sort()) await applyLocalSql(database, await readFile(`db/migrations/${file}`, 'utf8'));
 }

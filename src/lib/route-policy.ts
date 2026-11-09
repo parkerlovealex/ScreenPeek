@@ -8,7 +8,7 @@ export function redirectTarget(value: string, origin: string) {
   } catch { return null; }
 }
 export async function storedRedirect(db: D1Database, path: string, origin: string) {
-  const row = await db.prepare('SELECT to_target,type FROM redirects WHERE from_path=?').bind(path).first<{ to_target: string; type: number }>();
+  const row = await db.prepare('SELECT to_target,type FROM redirects WHERE from_path=? AND deleted_at IS NULL').bind(path).first<{ to_target: string; type: number }>();
   if (!row || row.type !== 301) return null;
   const target = redirectTarget(row.to_target, origin);
   return target && new URL(target, origin).pathname !== path ? target : null;

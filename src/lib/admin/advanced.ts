@@ -1,4 +1,5 @@
-import { AdminError, requirePermission } from './access.ts';
+import { undoBulk } from './universal.ts';
+import { AdminError, permitted, requirePermission } from './access.ts';
 import type { AdminIdentity, AdminModule } from './access.ts';
 import { commitChange, deliverChange, savedMessage } from './changes.ts';
 import type { AdminEnvironment, MirrorRef } from './changes.ts';
@@ -15,6 +16,7 @@ const definitions = {
 export async function undoChange(env: AdminEnvironment, actor: AdminIdentity, id: number, fetcher: typeof fetch = fetch) {
   if (!Number.isSafeInteger(id) || id < 1) throw new AdminError('Choose a valid change record.');
   const log = await env.DB.prepare('SELECT * FROM admin_log WHERE id=?').bind(id).first<AdminRow>();
+  if (log?.entity && String(log.entity).startsWith('bulk:')) return undoBulk(env,actor,id,fetcher);
   if (!log || !Object.hasOwn(definitions, String(log.entity))) throw new AdminError('This change cannot be undone here.');
   const def = definitions[String(log.entity) as keyof typeof definitions];
   requirePermission(actor, log.entity === 'config' && ['google_site_verification','bing_site_verification'].includes(String(log.entity_id)) ? 'seo' : def.module, true);
@@ -48,7 +50,7 @@ export async function advancedAction(env: AdminEnvironment, actor: AdminIdentity
   if (action === 'undo') return undoChange(env, actor, Number(form.get('log_id')), fetcher);
   if (action === 'retry-delivery' && module === 'dashboard') {
     if (actor.role !== 'owner') throw new AdminError('Only the owner can retry site-wide delivery.', 403);
-    const rows = (await env.DB.prepare('SELECT id FROM admin_delivery WHERE kv_done=0 OR purge_done=0 ORDER BY id LIMIT 10').all<{ id: number }>()).results;
+    const rows = (await env.DB.prepare('SELECT id FROM admin_delivery WHERE kv_done=0 OR purge_done=0 ORDER BY id LIMIT 1').all<{ id: number }>()).results;
     let complete = 0; for (const row of rows) { const result = await deliverChange(env, row.id, fetcher); if (result.kv && result.purge) complete++; }
     await env.DB.prepare("INSERT INTO admin_log(actor,entity,entity_id,after) VALUES(?,'delivery','retry',?)").bind(actor.email, JSON.stringify({ attempted: rows.length, completed: complete })).run();
     return `Retried ${rows.length} deliveries; ${complete} completed. Static pages still update on the next build.`;
@@ -88,7 +90,8 @@ export async function advancedData(env: AdminEnvironment, actor: AdminIdentity, 
   requirePermission(actor, module);
   const q = (url.searchParams.get('q') || '').slice(0,100), page = Math.max(1, Math.min(10000, Number.parseInt(url.searchParams.get('page') || '1') || 1));
   const actorFilter = (url.searchParams.get('actor') || '').slice(0,254), entity = (url.searchParams.get('entity') || '').slice(0,40);
-  const history = (await env.DB.prepare('SELECT * FROM admin_log WHERE (?=\'\' OR actor=?) AND (?=\'\' OR entity=?) ORDER BY id DESC LIMIT 50 OFFSET ?').bind(actorFilter,actorFilter,entity,entity,(page-1)*50).all<AdminRow>()).results;
+  const scope=(!permitted(actor,'ads')?" AND entity NOT IN ('ad_slot','bulk:ad_slots')":'')+(!permitted(actor,'settings')?" AND NOT(entity='config' AND entity_id NOT IN ('google_site_verification','bing_site_verification'))":'');
+  const history = (await env.DB.prepare(`SELECT * FROM admin_log WHERE (?='' OR actor=?) AND (?='' OR entity=?) ${scope} ORDER BY id DESC LIMIT 50 OFFSET ?`).bind(actorFilter,actorFilter,entity,entity,(page-1)*50).all<AdminRow>()).results;
   const redirects = module === 'seo' ? (await env.DB.prepare("SELECT * FROM redirects WHERE from_path LIKE ? ORDER BY from_path LIMIT 50 OFFSET ?").bind(`%${q}%`,(page-1)*50).all<AdminRow>()).results : [];
   const missing = module === 'seo' ? (await env.DB.prepare('SELECT * FROM notfound_log ORDER BY count DESC LIMIT 50 OFFSET ?').bind((page-1)*50).all<AdminRow>()).results : [];
   const overrides = module === 'seo' ? (await env.DB.prepare('SELECT * FROM seo_overrides ORDER BY path LIMIT 50 OFFSET ?').bind((page-1)*50).all<AdminRow>()).results : [];

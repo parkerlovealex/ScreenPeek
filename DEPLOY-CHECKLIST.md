@@ -27,3 +27,5 @@ Phase 1 is still in progress. Task 1.22 prepares deployment; final verification 
 - [ ] **Owner:** retain a known-good Worker version and use the Cloudflare Workers deployments dashboard for rollback. Source schema changes remain additive; do not run destructive migrations or restore a backup without the required owner approval.
 
 The current implementation uses approximate buffered counters as approved. Static pages take ad/content/settings changes on the next build; successful purge applies to cached SSR responses. A purge alone cannot rewrite static HTML.
+
+- [ ] **Deferred deployment setup:** create and confirm a separate private R2 backup bucket (no public domain/access), bind BACKUPS to it, and set R2_BACKUP_BUCKET/BACKUP_BUCKET_PRIVATE=1 before production preparation. Use scoped backup S3 credentials in Actions. Verify archive privacy, the first scheduled job, retention, and an isolated cloud restore.

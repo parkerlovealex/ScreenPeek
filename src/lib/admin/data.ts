@@ -19,13 +19,13 @@ export async function adminData(env: AdminEnvironment, actor: AdminIdentity, mod
   let total = 0, pending = 0, catalogue: CatalogueMeters | null = null;
   let documents: TrustDocument[] = [];
   if (module === 'links') {
-    const where = 'name LIKE ? ESCAPE \'\\\' OR slug LIKE ? ESCAPE \'\\\'';
+    const where = '(name LIKE ? ESCAPE \'\\\' OR slug LIKE ? ESCAPE \'\\\') AND deleted_at IS NULL';
     const values = [like(query), like(query)];
     total = (await db.prepare(`SELECT COUNT(*) AS count FROM links WHERE ${where}`).bind(...values).first<{ count: number }>())?.count || 0;
     links = (await db.prepare(`SELECT * FROM links WHERE ${where} ORDER BY name,slug LIMIT 50 OFFSET ?`).bind(...values, (page - 1) * 50).all<AdminLink>()).results;
-    if (url.searchParams.has('edit')) selectedLink = await db.prepare('SELECT * FROM links WHERE slug=?').bind((url.searchParams.get('edit') || '').slice(0, 120)).first<AdminLink>();
+    if (url.searchParams.has('edit')) selectedLink = await db.prepare('SELECT * FROM links WHERE slug=? AND deleted_at IS NULL').bind((url.searchParams.get('edit') || '').slice(0, 120)).first<AdminLink>();
   } else if (module === 'ads') {
-    slots = (await db.prepare('SELECT * FROM ad_slots ORDER BY page_type,placement').all<AdminAd>()).results;
+    slots = (await db.prepare('SELECT * FROM ad_slots WHERE deleted_at IS NULL ORDER BY page_type,placement').all<AdminAd>()).results;
     settings = (await db.prepare("SELECT key,value,revision FROM config WHERE key IN ('ads_enabled','popunder_cap_hours','ads_display_enabled','ads_native_enabled','ads_sticky_enabled','ads_social_enabled','ads_popunder_enabled','ads_txt')").all<SettingRow>()).results;
   }
   else if (module === 'content') {
@@ -51,15 +51,13 @@ export type AdminData = Awaited<ReturnType<typeof adminData>>;
 export async function exportAdminBackup(env: AdminEnvironment, actor: AdminIdentity) {
   requirePermission(actor, 'backup');
   if (actor.role !== 'owner') throw new Error('Owner permission is required.');
-  const tables = ['links', 'ad_slots', 'config', 'redirects', 'pages', 'taxonomy_overrides', 'collections', 'collection_titles'] as const;
+  const tables = ['links', 'ad_slots', 'config', 'redirects', 'pages', 'taxonomy_overrides', 'collections', 'collection_titles', 'homepage_sections'] as const;
   const data: Record<string, unknown[]> = {};
   for (const table of tables) {
-    const count = (await env.DB.prepare(`SELECT COUNT(*) AS count FROM ${table}`).first<{ count: number }>())?.count || 0;
-    if (count > 10_000) throw new Error('This configuration is too large for the manual export; use a full D1 backup.');
     data[table] = (await env.DB.prepare(`SELECT * FROM ${table} LIMIT 10001`).all()).results;
     if (data[table].length > 10_000) throw new Error('Configuration grew during export; retry the export.');
   }
-  const pins = (await env.DB.prepare('SELECT id,type,pinned,hidden FROM titles WHERE pinned<>0 OR hidden<>0 LIMIT 10001').all()).results;
+  const pins = (await env.DB.prepare('SELECT id,type,pinned,hidden,pin_starts_at,pin_ends_at FROM titles WHERE pinned<>0 OR hidden<>0 LIMIT 10001').all()).results;
   if (pins.length > 10_000) throw new Error('Too many content overrides for a manual export.');
   data.content = pins;
   return { format: 'screenpeek-config', version: 1, exported_at: new Date().toISOString(), data };

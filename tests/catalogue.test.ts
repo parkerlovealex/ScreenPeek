@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { homeTitles, listFilterOptions, listTitles, parseListFilters, sampleMode, titleUrl } from '../src/lib/catalogue.ts';
 import { mediaUrl } from '../src/lib/media.ts';
@@ -15,7 +15,7 @@ test('public catalogue queries use actual D1: pagination, filters, visibility, s
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     assert.equal(await sampleMode(db), true);
     const first = await listTitles(db, { type: 'movie', includeUngated: true });
     const second = await listTitles(db, { type: 'movie', includeUngated: true, page: 2 });

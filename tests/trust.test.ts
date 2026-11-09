@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { loadTrustPage, trustMarkdown, trustSlugs } from '../src/lib/trust.ts';
 
 test('trust Markdown escapes HTML, blocks active protocols and images, and retains ordinary Markdown', () => {
@@ -17,7 +17,7 @@ test('actual D1 trust defaults load, stored edits render, and storage failures a
   const local = await localBindings(state), db = local.database as unknown as D1Database;
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
-    await applyLocalSql(local.database, await readFile('db/migrations/005-trust-pages.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     for (const slug of trustSlugs) {
       const data = await loadTrustPage(db, slug);
       assert.equal(data.status, slug === '404' ? 404 : 200); assert.ok(data.html.length > 50);

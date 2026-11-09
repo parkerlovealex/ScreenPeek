@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { localBindings, applyLocalSql } from '../sync/local.ts';
+import { localBindings, applyLocalSql, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { loadWatchPage } from '../src/lib/watch.ts';
 import { countryCookie, requestCountry } from '../src/lib/geo.ts';
@@ -30,7 +30,7 @@ test('watch data groups owned provider metadata by country and emits only config
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     const title = (await local.db.query<{ slug: string }>('SELECT slug FROM titles WHERE id=-10002'))[0];
     const request = new Request('https://site.test/watch/title/?country=GB');
     const unconfigured = await loadWatchPage(db, empty, title.slug, request);

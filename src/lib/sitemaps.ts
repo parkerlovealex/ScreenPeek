@@ -6,20 +6,20 @@ interface SitemapEnvironment extends SeoEnvironment { DB: D1Database; }
 const size = 10_000;
 const visible = 't.quality_gate=1 AND t.hidden=0 AND t.deleted=0 AND t.deleted_at IS NULL';
 const titlePath = "'/'||CASE WHEN t.type='movie' THEN 'movie' ELSE 'tv' END||'/'||t.slug||'/'";
-const titleWhere = `${visible} AND NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path=${titlePath} AND o.noindex=1)`;
-const personWhere = `p.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path='/cast/'||p.slug||'/' AND o.noindex=1)
+const titleWhere = `${visible} AND NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path=${titlePath} AND o.noindex=1 AND o.deleted_at IS NULL)`;
+const personWhere = `p.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path='/cast/'||p.slug||'/' AND o.noindex=1 AND o.deleted_at IS NULL)
   AND EXISTS(SELECT 1 FROM credits c JOIN titles t ON t.id=c.title_id AND t.type=c.title_type WHERE c.person_id=p.id AND ${visible})`;
 const taxonomy = `SELECT x.kind,x.slug FROM (
   SELECT 'genre' AS kind,g.slug FROM genres g WHERE EXISTS(SELECT 1 FROM title_genres r JOIN titles t ON t.id=r.title_id AND t.type=r.title_type WHERE r.genre_slug=g.slug AND ${visible})
-  UNION ALL SELECT 'collection',c.slug FROM collections c WHERE EXISTS(SELECT 1 FROM collection_titles r JOIN titles t ON t.id=r.title_id AND t.type=r.title_type WHERE r.collection_slug=c.slug AND ${visible})
+  UNION ALL SELECT 'collection',c.slug FROM collections c WHERE c.deleted_at IS NULL AND (c.starts_at IS NULL OR datetime(c.starts_at)<=datetime('now')) AND (c.ends_at IS NULL OR datetime(c.ends_at)>datetime('now')) AND EXISTS(SELECT 1 FROM collection_titles r JOIN titles t ON t.id=r.title_id AND t.type=r.title_type WHERE r.collection_slug=c.slug AND ${visible})
   UNION ALL SELECT 'language',l.slug FROM languages l WHERE EXISTS(SELECT 1 FROM titles t WHERE t.original_language=l.slug AND ${visible})
-  ) x WHERE NOT EXISTS(SELECT 1 FROM taxonomy_overrides o WHERE o.kind=x.kind AND o.slug=x.slug AND o.hidden<>0)
-  AND NOT EXISTS(SELECT 1 FROM seo_overrides s WHERE s.path='/'||x.kind||'/'||x.slug||'/' AND s.noindex=1)`;
+  ) x WHERE NOT EXISTS(SELECT 1 FROM taxonomy_overrides o WHERE o.kind=x.kind AND o.slug=x.slug AND o.hidden<>0 AND o.deleted_at IS NULL)
+  AND NOT EXISTS(SELECT 1 FROM seo_overrides s WHERE s.path='/'||x.kind||'/'||x.slug||'/' AND s.noindex=1 AND s.deleted_at IS NULL)`;
 const pageQuery = `SELECT path,updated_at FROM (
   WITH core(path,type,upcoming) AS (VALUES('/',NULL,0),('/movies/','movie',0),('/series/','tv',0),('/new/',NULL,0),('/top10/',NULL,0),('/upcoming/',NULL,1))
   SELECT core.path,NULL AS updated_at FROM core WHERE core.path='/' OR EXISTS(SELECT 1 FROM titles t WHERE ${visible} AND (core.type IS NULL OR t.type=core.type) AND (core.upcoming=0 OR t.release_date>date('now')))
   UNION ALL SELECT '/'||slug||'/',updated_at FROM pages WHERE slug IN('about','privacy','dmca','contact') AND length(trim(title))>0 AND length(trim(body_md))>0
-  ) p WHERE NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path=p.path AND o.noindex=1)`;
+  ) p WHERE NOT EXISTS(SELECT 1 FROM seo_overrides o WHERE o.path=p.path AND o.noindex=1 AND o.deleted_at IS NULL)`;
 export const xmlEscape = (value: string) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;');
 const xml = (body: string, status = 200, cache = 'public, s-maxage=86400, stale-while-revalidate=604800') => new Response(`<?xml version="1.0" encoding="UTF-8"?>\n${body}`, {
   status, headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': cache, 'X-Content-Type-Options': 'nosniff' },

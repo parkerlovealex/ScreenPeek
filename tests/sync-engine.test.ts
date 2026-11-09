@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { localBindings, applyLocalSql } from '../sync/local.ts';
+import { localBindings, applyLocalSql, applyLocalMigrations } from '../sync/local.ts';
 import { runSync } from '../sync/engine.ts';
 import { fixtureSource } from '../sync/fixtures.ts';
 import { TmdbError } from '../sync/tmdb.ts';
@@ -13,7 +13,7 @@ test('local importer: 50 titles with owned images, FTS, seasons and idempotent r
   const local = await localBindings(root);
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     const source = fixtureSource();
     const options = { db: local.db, client: source, images: local.images, now: () => new Date('2026-11-09T00:00:00Z'), environment: {} };
     const first = await runSync(options);
@@ -51,7 +51,7 @@ test('source failures keep existing data; removed source titles are hidden and l
   const local = await localBindings(root);
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     const source = fixtureSource(1);
     const options = { db: local.db, client: source, images: local.images, environment: {} };
     assert.equal((await runSync(options)).added, 1);

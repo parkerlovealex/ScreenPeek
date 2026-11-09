@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { loadTrailerPage, validTrailerKey } from '../src/lib/trailer.ts';
 
@@ -24,7 +24,7 @@ test('trailer data uses actual D1 metadata and inherits catalogue status without
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     const movieSlug = (await local.db.query('SELECT slug FROM titles WHERE id=-10002'))[0].slug as string;
     const tvSlug = (await local.db.query('SELECT slug FROM titles WHERE id=-10032'))[0].slug as string;
 

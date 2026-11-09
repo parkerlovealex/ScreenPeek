@@ -1,10 +1,12 @@
 ---
+import { restoreForm } from '../../lib/admin/restore';
 import { env } from 'cloudflare:workers';
 import AdminPanel from '../../components/admin/AdminPanel.astro';
 import { AdminError, permitted, requirePermission } from '../../lib/admin/access';
 import type { AdminModule } from '../../lib/admin/access';
 import { adminData, exportAdminBackup } from '../../lib/admin/data';
 import type { AdminData } from '../../lib/admin/data';
+import { csvRows, listData, listDefaults, listSpec } from '../../lib/admin/universal';
 import { adminForm, applyAdminAction } from '../../lib/admin/actions';
 const allowed = ['dashboard', 'links', 'ads', 'content', 'pages', 'sync', 'settings', 'backup', 'seo', 'changes'];
 const module = (Astro.params.path || 'dashboard') as AdminModule;
@@ -16,8 +18,9 @@ try {
   if (!allowed.includes(module)) throw new AdminError('Admin module not found.', 404);
   if (module === 'dashboard' && actor && !permitted(actor, module)) return Astro.redirect('/admin/links/', 302);
   requirePermission(actor, module);
+  if (Astro.url.searchParams.has('list')) listSpec(actor,Astro.url.searchParams.get('list') || '');
   if (Astro.request.method === 'POST') {
-    submitted = await adminForm(Astro.request);
+    submitted = module==='backup' && Astro.request.headers.get('Content-Type')?.startsWith('multipart/form-data') ? await restoreForm(Astro.request) : await adminForm(Astro.request);
     const result = await applyAdminAction(env, actor, module, submitted);
     message = result.message; jobUrl = result.jobUrl;
     try {
@@ -40,6 +43,18 @@ try {
       } catch { /* Delivery status remains available on the Dashboard. */ }
       Astro.cookies.delete('admin_notice', { path: '/admin' });
     }
+  }
+  if (Astro.url.searchParams.get('ucsv') === '1') {
+    if (!['owner','editor'].includes(actor.role)) throw new AdminError('Only Owner/Editor roles can export CSV.',403);
+    const name=Astro.url.searchParams.get('list') || listDefaults[module] || '';
+    const records=await listData(env,actor,name,Astro.url,true);
+    return new Response(csvRows(records.rows),{headers:{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':`attachment; filename="screenpeek-${name}.csv"`,'Cache-Control':'private, no-store'}});
+  }
+  if(module==='backup' && Astro.url.searchParams.has('snapshot')){
+    if(actor.role!=='owner'||!env.BACKUPS)throw new AdminError('Owner permission and private backup storage are required.',403);
+    const key=Astro.url.searchParams.get('snapshot')||'';if(!/^backups\/\d{4}-[\w.-]+\.json\.gz$/.test(key))throw new AdminError('Choose a valid private snapshot.');
+    const object=await env.BACKUPS.get(key);if(!object)throw new AdminError('Snapshot not found.',404);
+    return new Response(object.body,{headers:{'Content-Type':'application/gzip','Content-Disposition':`attachment; filename="${key.split('/').pop()}"`,'Cache-Control':'private, no-store'}});
   }
   if (module === 'backup' && Astro.url.searchParams.get('download') === '1') {
     const backup = await exportAdminBackup(env, actor);

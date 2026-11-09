@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createAdResolver, adActive } from '../src/lib/ads.ts';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 
 test('ad schedules fail closed and preview/watch exclusions do not even read storage', async () => {
   const slot = { page_type: 'detail', placement: 'native', code: '<p>Test advertisement</p>', enabled: 1 } as const;
@@ -27,7 +27,7 @@ test('actual D1/KV resolves only its own slot; disabled mirrors and untrusted te
   const env = { DB: local.database as unknown as D1Database, CONFIG: local.config as unknown as KVNamespace, ADS_ENABLED: '1' };
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
-    await applyLocalSql(local.database, await readFile('db/migrations/002-ad-test-mode.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     const code = '\n<script data-test="original">window.example = "unchanged";</script>\n';
     await local.db.batch([
       { sql: "UPDATE config SET value='1' WHERE key='ads_enabled'" },

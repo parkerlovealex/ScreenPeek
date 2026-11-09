@@ -1,3 +1,5 @@
+import { restoreConfiguration } from './restore.ts';
+import { universalAction } from './universal.ts';
 import { advancedAction } from './advanced.ts';
 import { AdminError, requirePermission } from './access.ts';
 import type { AdminIdentity, AdminModule } from './access.ts';
@@ -58,12 +60,14 @@ export async function adminForm(request: Request) {
     body += decoder.decode();
   } finally { reader.releaseLock(); }
   const form = new URLSearchParams(body);
-  for (const key of form.keys()) if (form.getAll(key).length !== 1) throw new AdminError('Duplicate form fields are not supported.');
+  for (const key of form.keys()) if (form.getAll(key).length !== 1 && !(key === 'u_keys' && form.getAll(key).length <= 5)) throw new AdminError('Duplicate form fields are not supported.');
   return form;
 }
 interface LinkRow extends Record<string, unknown> { slug: string; name: string; destination: string; type: string; enabled: number; rules: string; revision: number; clicks_total: number; }
 export async function applyAdminAction(env: AdminEnvironment, identity: AdminIdentity | undefined, module: AdminModule, form: URLSearchParams, fetcher: typeof fetch = fetch) {
   requirePermission(identity, module, true);
+  if(module==='backup' && form.get('action')==='restore-config')return {message:await restoreConfiguration(env,identity,form,fetcher),jobUrl:undefined};
+  if (form.has('u_action')) return { message: await universalAction(env, identity, module, form, fetcher), jobUrl: undefined };
   if (['seo','changes'].includes(module) || form.get('action') === 'retry-delivery') return { message: await advancedAction(env, identity, module, form, fetcher), jobUrl: undefined };
   if (module === 'sync') {
     if (form.get('action') !== 'run-sync') throw new AdminError('Unknown sync action.');
@@ -74,7 +78,7 @@ export async function applyAdminAction(env: AdminEnvironment, identity: AdminIde
   const related: Array<{ sql: string; params: Array<string | number | null> }> = [];
   if (module === 'links') {
     const oldSlug = text(form, 'original_slug', 120);
-    const previous = oldSlug ? await env.DB.prepare('SELECT * FROM links WHERE slug=?').bind(oldSlug).first<LinkRow>() : null;
+    const previous = oldSlug ? await env.DB.prepare('SELECT * FROM links WHERE slug=? AND deleted_at IS NULL').bind(oldSlug).first<LinkRow>() : null;
     if (oldSlug && !previous) throw new AdminError('Link not found.', 404);
     const slug = slugValue(text(form, 'slug', 120));
     if (previous && previous.slug !== slug && previous.clicks_total > 0) throw new AdminError('This slug is locked because it has recorded clicks.');
@@ -115,7 +119,7 @@ export async function applyAdminAction(env: AdminEnvironment, identity: AdminIde
       if (slugs.length > 5) throw new AdminError('Choose up to five social links.');
       for (const slug of slugs) {
         slugValue(slug);
-        const link = await env.DB.prepare("SELECT slug FROM links WHERE slug=? AND type='social'").bind(slug).first();
+        const link = await env.DB.prepare("SELECT slug FROM links WHERE slug=? AND deleted_at IS NULL AND type='social'").bind(slug).first();
         if (!link) throw new AdminError('Create each social link in Link Manager first, with the social type.');
       }
     }

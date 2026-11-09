@@ -182,6 +182,8 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 
 ## Deferred deployment verification
 
+- **1.35:** verify the private BACKUPS binding and configuration restore against staged cloud resources; local upload, pre-snapshot, D1 replacement and resumable KV propagation are tested without a live account.
+
 - **1.34:** configure/verify the separate private R2 backup bucket, scoped S3 keys and first scheduled backup/retention; repeat restoration against a separate cloud D1. No public backup storage is permitted.
 
 - **1.30:** verify generated OG cards through the real R2 hostname and social crawlers.
@@ -223,3 +225,7 @@ Four native admin tests and two ad tests pass. Browser regression plus new v2 fl
 ## 1.34 — private daily backup
 
 Two encoding/retention/S3 tests pass. Actual Wrangler local export succeeds; a third test restores its archive into an isolated native D1 and verifies title/FTS/config data. D1 cannot export virtual tables, so derived FTS is rebuilt from title rows. The guarded daily workflow uploads full application SQL plus config to separate private R2, retains 14 only after a successful upload, and excludes platform secrets. Typecheck, Actionlint and whitespace checks pass. Remote execution and access controls are deferred as requested.
+
+## 1.35 — shared admin powers
+
+Six native admin tests, 51 catalogue tests, 21 sync tests, five hybrid tests and 15 selected browser checks pass. Coverage includes search/filter/sort/50-row lists; Owner/Editor CSV restrictions and formula escaping; five-row atomic bulk edits with one audit entry; rollback on concurrent mutation; used-in confirmation; Trash/restore and permanent title tombstones/blocklist; 30-day scheduled expiry; guarded Undo; homepage order/schedules/manual Top 10; collections/membership; taxonomy controls. Owner configuration upload requires RESTORE and a successful private pre-snapshot; storage failure leaves D1 intact, and KV publication resumes in bounded outbox batches. Shared fixtures now apply current additive migrations. Operational logs remain read-only. Typecheck/build/Actionlint pass. Full SQL archives restore into isolated local D1; live storage and restore checks are deferred.

@@ -36,6 +36,12 @@ export function productionConfig(input, env) {
   config.keep_vars = true;
   const db = config.d1_databases?.find(binding => binding.binding === 'DB');
   const namespace = config.kv_namespaces?.find(binding => binding.binding === 'CONFIG');
+  const backups = config.r2_buckets?.find(binding => binding.binding === 'BACKUPS');
+  if (backups) {
+    const backupBucket = required(env, 'R2_BACKUP_BUCKET');
+    if (!/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(backupBucket) || backupBucket === bucket || env.BACKUP_BUCKET_PRIVATE !== '1') throw new Error('Configure and confirm a separate private R2 backup bucket before deployment.');
+    backups.bucket_name = backupBucket;
+  }
   const posters = config.r2_buckets?.find(binding => binding.binding === 'POSTERS');
   if (!db || !namespace || !posters || config.assets?.binding !== 'ASSETS') throw new Error('Build the Astro Worker with DB, CONFIG, POSTERS and ASSETS bindings first.');
   db.database_id = id; namespace.id = kv; delete namespace.preview_id; posters.bucket_name = bucket;

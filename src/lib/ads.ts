@@ -12,12 +12,13 @@ export type AdPage = keyof typeof adMap;
 export type AdPlacement = typeof adMap[AdPage][number];
 export interface AdRecord {
   page_type: AdPage; placement: AdPlacement; code: string; enabled: number | boolean;
-  starts_at?: string | null; ends_at?: string | null; test_mode?: number | boolean;
+  deleted_at?: string | null; starts_at?: string | null; ends_at?: string | null; test_mode?: number | boolean;
 }
 interface AdEnvironment { DB: D1Database; CONFIG: KVNamespace; ADS_ENABLED?: string; }
 export const adKey = (page: AdPage, placement: AdPlacement) => `ad:${page}:${placement}`;
 export const adAllowed = (page: AdPage, placement: AdPlacement) => (adMap[page] as readonly string[]).includes(placement);
 export function adActive(slot: AdRecord, now = new Date()) {
+  if (slot.deleted_at) return false;
   if (!(slot.enabled === 1 || slot.enabled === true) || typeof slot.code !== 'string' || !slot.code.trim()) return false;
   for (const date of [slot.starts_at, slot.ends_at]) if (date && !Number.isFinite(Date.parse(date))) return false;
   return (!slot.starts_at || Date.parse(slot.starts_at) <= now.getTime()) && (!slot.ends_at || Date.parse(slot.ends_at) > now.getTime());
@@ -63,7 +64,7 @@ export function createAdResolver(env: AdEnvironment, authenticatedTest = false) 
                 return slot.page_type === page && slot.placement === placement ? slot : null;
               }
             } catch { /* Read-only fallback when KV is unavailable. */ }
-            return env.DB.prepare('SELECT page_type,placement,code,enabled,starts_at,ends_at,test_mode FROM ad_slots WHERE page_type=? AND placement=?').bind(page, placement).first<AdRecord>();
+            return env.DB.prepare('SELECT page_type,placement,code,enabled,starts_at,ends_at,test_mode,deleted_at FROM ad_slots WHERE page_type=? AND placement=?').bind(page, placement).first<AdRecord>();
           })();
           slots.set(key, result);
         }

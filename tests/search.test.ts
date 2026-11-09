@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { localBindings, applyLocalSql } from '../sync/local.ts';
+import { localBindings, applyLocalSql, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { loadSearchPage, matchQuery, searchText, searchTitles } from '../src/lib/search.ts';
 import { handleSearch } from '../functions/api/search.ts';
@@ -24,7 +24,7 @@ test('search operates against actual local D1 with bounded API results and safe 
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
 
     await context.test('full results paginate 24+24+2 and prefix words match without syntax errors', async () => {
       const pages = await Promise.all([1, 2, 3].map(page => searchTitles(db, 'Sample', { includeUngated: true, filters: { page } })));

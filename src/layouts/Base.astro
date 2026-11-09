@@ -18,7 +18,7 @@ const site = await siteConfig(Astro.locals, env);
 const logo = mediaUrl(site.logo, env.R2_PUBLIC_BASE);
 const canonical = canonicalUrl(Astro.url, siteOrigin(env.SITE_URL), pageNumber);
 let override: { title: string | null; noindex: number } | null = null;
-try { override = await env.DB.prepare('SELECT title,noindex FROM seo_overrides WHERE path=?').bind(Astro.url.pathname).first(); } catch { /* Default metadata remains available. */ }
+try { override = await env.DB.prepare('SELECT title,noindex FROM seo_overrides WHERE path=? AND deleted_at IS NULL').bind(Astro.url.pathname).first(); } catch { /* Default metadata remains available. */ }
 const indexBlocked = noindex || sample || filteredUrl(Astro.url) || !productionSeo(env) || override?.noindex === 1;
 const fullTitle = override?.title?.trim() || `${title} | ${site.name}`;
 const summary = description.trim().slice(0, 155);

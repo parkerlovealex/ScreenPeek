@@ -1,3 +1,4 @@
+import { manualTitles } from './home-config.ts';
 export interface TitleCard {
   id: number; type: 'movie' | 'tv'; slug: string; title: string; year: number | null;
   poster_r2: string | null; poster_color: string | null; vote_average: number | null;
@@ -35,6 +36,10 @@ export async function sampleMode(db: D1Database) {
 }
 
 export async function listTitles(db: D1Database, filters: ListFilters = {}): Promise<CataloguePage> {
+  if (filters.mode === 'top10') {
+    const section=await db.prepare("SELECT key,label,ord,source,pins FROM homepage_sections WHERE key='top10' AND deleted_at IS NULL AND (starts_at IS NULL OR datetime(starts_at)<=datetime('now')) AND (ends_at IS NULL OR datetime(ends_at)>datetime('now'))").first<import('./home-config.ts').HomeSection>();
+    if(section?.source==='manual'){const titles=await manualTitles(db,section,!!filters.includeUngated);const page=filters.page||1;return {titles:page===1?titles:[],total:titles.length,page,pages:1};}
+  }
   const clauses = [visible];
   const values: Array<string | number> = [];
   if (!filters.includeUngated) clauses.push('t.quality_gate=1');
@@ -65,7 +70,7 @@ export async function listTitles(db: D1Database, filters: ListFilters = {}): Pro
 
 export async function listFilterOptions(db: D1Database) {
   const [genres, years] = await Promise.all([
-    db.prepare('SELECT slug,name FROM genres WHERE title_count>0 ORDER BY name').all<{ slug: string; name: string }>(),
+    db.prepare(`SELECT g.slug,COALESCE(NULLIF(o.display_name,''),g.name) name FROM genres g LEFT JOIN taxonomy_overrides o ON o.kind='genre' AND o.slug=g.slug AND o.deleted_at IS NULL WHERE g.title_count>0 AND COALESCE(o.hidden,0)=0 ORDER BY COALESCE(o.ord,0),name`).all<{ slug: string; name: string }>(),
     db.prepare('SELECT DISTINCT year FROM titles t WHERE year IS NOT NULL AND ' + visible + ' ORDER BY year DESC').all<{ year: number }>(),
   ]);
   return { genres: genres.results, years: years.results.map(row => row.year) };
@@ -76,10 +81,10 @@ export async function homeTitles(db: D1Database, includeUngated = false) {
   const query = async (condition: string, order: string, limit: number) =>
     (await db.prepare(`SELECT ${fields} FROM titles t WHERE ${where} ${condition} ORDER BY ${order},t.id DESC LIMIT ?`).bind(limit).all<TitleCard>()).results;
   const [trending, top10, movies, series, upcoming, genres] = await Promise.all([
-    query('', 't.pinned DESC,t.popularity DESC', 6), query('', 't.popularity DESC', 10),
+    query('', "CASE WHEN t.pinned=1 AND (t.pin_starts_at IS NULL OR datetime(t.pin_starts_at)<=datetime('now')) AND (t.pin_ends_at IS NULL OR datetime(t.pin_ends_at)>datetime('now')) THEN 1 ELSE 0 END DESC,t.popularity DESC", 6), query('', 't.popularity DESC', 10),
     query("AND t.type='movie'", 't.added_at DESC', 6), query("AND t.type='tv'", 't.added_at DESC', 6),
     query("AND t.release_date>date('now')", 't.release_date ASC', 6),
-    db.prepare('SELECT slug,name,title_count FROM genres WHERE title_count>0 ORDER BY title_count DESC,name LIMIT 12').all<{ slug: string; name: string; title_count: number }>(),
+    db.prepare(`SELECT g.slug,COALESCE(NULLIF(o.display_name,''),g.name) name,g.title_count FROM genres g LEFT JOIN taxonomy_overrides o ON o.kind='genre' AND o.slug=g.slug AND o.deleted_at IS NULL WHERE g.title_count>0 AND COALESCE(o.hidden,0)=0 ORDER BY COALESCE(o.ord,0),g.title_count DESC,name LIMIT 12`).all<{ slug: string; name: string; title_count: number }>(),
   ]);
   // 6+6+6+6 poster cards maximum; Top10 is a text-only ranked list.
   return { trending, top10, movies, series, upcoming, genres: genres.results };

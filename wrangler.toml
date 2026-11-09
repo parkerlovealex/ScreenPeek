@@ -25,6 +25,10 @@ id = "00000000000000000000000000000001"
 binding = "POSTERS"
 bucket_name = "posters"
 
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "screenpeek-private-backups-local"
+
 [vars]
 SITE_NAME = "ScreenPeek"
 ADS_ENABLED = "0"

@@ -1,3 +1,4 @@
+import { purgeExpiredTrash } from './trash.ts';
 import { posterColour } from './colour.ts';
 import { composeOg } from './og.ts';
 import type { TmdbClient } from './tmdb.ts';
@@ -176,6 +177,7 @@ export async function runSync(options: {
         deferred.push(candidate);
       }
     }
+    await purgeExpiredTrash({query:db.query.bind(db),batch:async statements=>{const result=await db.batch(statements);rowsWritten+=result.rowsWritten;return result;}},clock(),Math.min(1000,Math.max(0,Math.floor((budget-rowsWritten)/10))));
     // Small transactional chunks keep each request within D1 API limits.
     for (let offset = 0; offset < deferred.length; offset += 100) {
       if (rowsWritten >= 80_000) { warn('Queue write safety cap reached; catch-up window remains open.'); break; }

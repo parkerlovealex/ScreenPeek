@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { ClickBuffer } from '../src/lib/counters.ts';
 import { resolveDestination } from '../src/lib/links.ts';
 import { handleGo } from '../functions/go/[slug].ts';
@@ -25,6 +25,7 @@ test('actual D1 batches approximate clicks; safe redirects do not wait for loggi
   const kv = { async get() { return null; } } as unknown as KVNamespace;
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     await local.db.batch([{ sql: "INSERT INTO links(slug,name,destination,type) VALUES('sample','Sample','https://default.example.test','affiliate')" }]);
     const buffer = new ClickBuffer(db);
     for (let i = 0; i < 100; i++) buffer.record({ slug: 'sample', day: '2026-11-09', country: 'US', device: 'desktop' });

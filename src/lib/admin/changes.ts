@@ -5,7 +5,7 @@ import { adKey } from '../ads.ts';
 
 export type MirrorRef = { kind: 'link'; id: string } | { kind: 'ad'; page: AdPage; placement: AdPlacement } | { kind: 'config'; key: string };
 export interface AdminEnvironment {
-  DB: D1Database; CONFIG: KVNamespace; CLOUDFLARE_ZONE_ID?: string; CLOUDFLARE_API_TOKEN?: string;
+  DB: D1Database; CONFIG: KVNamespace; BACKUPS?: R2Bucket; CLOUDFLARE_ZONE_ID?: string; CLOUDFLARE_API_TOKEN?: string;
   GITHUB_REPO?: string; GITHUB_ACTIONS_TOKEN?: string; SITE_URL?: string;
 }
 interface Change {
@@ -27,14 +27,15 @@ export async function commitChange(db: D1Database, actor: AdminIdentity, change:
   return Number(results[2].meta.last_row_id);
 }
 /** Replay uses current authoritative D1 values rather than historical payloads. */
-export async function deliverChange(env: AdminEnvironment, deliveryId: number, fetcher: typeof fetch = fetch) {
-  const row = await env.DB.prepare('SELECT payload,kv_done,purge_done FROM admin_delivery WHERE id=?').bind(deliveryId).first<{ payload: string; kv_done: number; purge_done: number }>();
+export async function deliverChange(env: AdminEnvironment, deliveryId: number, fetcher: typeof fetch = fetch, maxMirrors = 24) {
+  const row = await env.DB.prepare('SELECT payload,kv_done,purge_done,kv_cursor FROM admin_delivery WHERE id=?').bind(deliveryId).first<{ payload: string; kv_done: number; purge_done: number; kv_cursor: number }>();
   if (!row) return { kv: false, purge: false };
   let kv = !!row.kv_done, purge = !!row.purge_done;
+  let cursor = row.kv_cursor || 0;
   const errors: string[] = [];
   if (!kv) try {
     const refs = JSON.parse(row.payload) as MirrorRef[];
-    for (const ref of refs) {
+    for (const ref of refs.slice(cursor,cursor+Math.max(1,Math.min(24,maxMirrors)))) {
       if (ref.kind === 'link') {
         const record = await env.DB.prepare('SELECT * FROM links WHERE slug=?').bind(ref.id).first();
         await env.CONFIG.put(`link:${ref.id}`, JSON.stringify(record || { slug: ref.id, enabled: 0, destination: '', rules: '{}' }));
@@ -45,10 +46,12 @@ export async function deliverChange(env: AdminEnvironment, deliveryId: number, f
         const record = await env.DB.prepare('SELECT value FROM config WHERE key=?').bind(ref.key).first<{ value: string }>();
         await env.CONFIG.put(`config:${ref.key}`, record?.value || '');
       }
+      cursor++;
     }
-    kv = true;
+    kv = cursor >= refs.length;
+    if (!kv) errors.push('KV propagation is pending; retry delivery to continue the bounded batch.');
   } catch { errors.push('KV propagation failed'); }
-  if (!purge) {
+  if (kv && !purge) {
     if (!env.CLOUDFLARE_API_TOKEN || !/^[a-f0-9]{32}$/i.test(env.CLOUDFLARE_ZONE_ID || '')) errors.push('Cache purge is not configured');
     else try {
       const response = await fetcher(`https://api.cloudflare.com/client/v4/zones/${env.CLOUDFLARE_ZONE_ID}/purge_cache`, {
@@ -60,8 +63,8 @@ export async function deliverChange(env: AdminEnvironment, deliveryId: number, f
       if (!purge) errors.push('Cache purge failed');
     } catch { errors.push('Cache purge failed'); }
   }
-  await env.DB.prepare('UPDATE admin_delivery SET kv_done=?,purge_done=?,attempts=attempts+1,last_error=? WHERE id=?')
-    .bind(Number(kv), Number(purge), errors.join('; ') || null, deliveryId).run();
+  await env.DB.prepare('UPDATE admin_delivery SET kv_done=?,purge_done=?,kv_cursor=?,attempts=attempts+1,last_error=? WHERE id=?')
+    .bind(Number(kv), Number(purge), cursor, errors.join('; ') || null, deliveryId).run();
   return { kv, purge };
 }
 export const savedMessage = (delivery: { kv: boolean; purge: boolean }) => delivery.kv && delivery.purge ?

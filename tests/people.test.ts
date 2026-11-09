@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { creditLabel, loadPersonPage } from '../src/lib/people.ts';
 
@@ -14,7 +14,7 @@ test('people and filmography queries use actual D1 with role grouping, type-safe
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     await local.db.batch([
       { sql: "INSERT INTO people(id,slug,name,bio,profile_r2,updated_at) VALUES(-29001,'sample-filmography-person','Sample Filmography Person','Synthetic biography for local filmography testing.','profile/sample-person.webp','2026-11-09T00:00:00Z'),(-29002,'sample-shared-id-person','Sample Shared ID Person','Synthetic shared-ID fixture.',NULL,'2026-11-09T00:00:00Z'),(-29003,'sample-empty-person','Sample Empty Person',NULL,NULL,'2026-11-09T00:00:00Z')" },
       { sql: "INSERT INTO credits(title_id,title_type,person_id,role,character,ord) SELECT id,type,-29001,'cast','Sample Lead',0 FROM titles WHERE type='movie'" },

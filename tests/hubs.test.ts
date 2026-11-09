@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { createSeedSql } from '../db/seed.mjs';
 import { loadHubPage } from '../src/lib/hubs.ts';
 
@@ -16,7 +16,7 @@ test('taxonomy and list hubs read actual D1 with memberships, ordering, visibili
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
     await applyLocalSql(local.database, createSeedSql());
-    await applyLocalSql(local.database, await readFile('db/migrations/001-sync-metadata.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     await local.db.batch([
       { sql: "INSERT INTO collections(slug,name) VALUES('sample-picks','Sample Picks')" },
       { sql: "INSERT INTO collection_titles(collection_slug,title_id,title_type,source) VALUES('sample-picks',-10001,'movie','manual'),('sample-picks',-10002,'movie','manual'),('sample-picks',-10031,'tv','manual')" },
