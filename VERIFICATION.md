@@ -30,3 +30,11 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 - Verified Bearer/v3 authentication, bundled endpoints, pagination, five-request cap through response-body completion, Retry-After seconds/date and exponential backoff, retry exhaustion, transient errors, non-retried 401s, invalid JSON, input validation, and credential redaction.
 - `npm run typecheck`: 16 files, 0 errors/warnings/hints.
 - Live key/authentication and real TMDb behaviour remain unverified, per the owner's local-placeholder choice.
+
+## 1.4 — collection, admission and metadata transformation
+
+- `npm run test:sync`: 27 passed, 0 failed/skipped (17 client tests plus 10 collector/transform tests).
+- Verified changes pagination, five discovery feeds, failed-gap lookback up to 14 days, manual-reconciliation flag for larger gaps, typed-ID deduplication, freshness/blocklist/deletion filters, deterministic priority and deferred overflow at 2,000 titles.
+- Bundled fetches preserve queue-order slug reservation, report 404s without deleting data, reject mismatched IDs, and verify unknown changed-title metadata before admission.
+- Verified stable slugs, collision suffixes, 12 cast members, creators/directors, four-country providers, trailers, release metadata and owned-poster quality gating.
+- Typecheck: 20 files, 0 errors/warnings/hints. All source responses are simulated; no live import or persistence integration has been claimed yet.

@@ -4,7 +4,7 @@
 - [x] 1.1 Astro + TS scaffold, repo structure, base layout, single CSS, AdSlot placeholder component
 - [x] 1.2 `db/schema.sql` applied locally; seed script (~50 sample titles) + seed removal note
 - [x] 1.3 `sync/tmdb.ts` client (Bearer auth, 429 backoff, concurrency cap)
-- [ ] 1.4 Sync: changes + discovery collectors, filter, bundled detail fetch, transform + slugs
+- [x] 1.4 Sync: changes + discovery collectors, filter, bundled detail fetch, transform + slugs
 - [ ] 1.5 Poster pipeline: R2 upload, WebP w185/w500 + profile w185 + backdrop w300 (sharp), idempotent
 - [ ] 1.6 Sync: D1 upserts, lookup counts, FTS update, sync_log, Telegram failure alert
 - [ ] 1.7 Workflows: `sync.yml` (daily 08:30 UTC + dispatch), `ci.yml` (typecheck + build)
