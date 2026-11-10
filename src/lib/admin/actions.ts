@@ -1,3 +1,4 @@
+import { setIssueSnooze } from './health.ts';
 import { restoreConfiguration } from './restore.ts';
 import { universalAction } from './universal.ts';
 import { advancedAction } from './advanced.ts';
@@ -66,6 +67,7 @@ export async function adminForm(request: Request) {
 interface LinkRow extends Record<string, unknown> { slug: string; name: string; destination: string; type: string; enabled: number; rules: string; revision: number; clicks_total: number; }
 export async function applyAdminAction(env: AdminEnvironment, identity: AdminIdentity | undefined, module: AdminModule, form: URLSearchParams, fetcher: typeof fetch = fetch) {
   requirePermission(identity, module, true);
+  if(module==='dashboard' && ['snooze-issue','reopen-issue'].includes(form.get('action')||''))return {message:await setIssueSnooze(env,identity,form.get('issue_key')||'',form.get('action')==='reopen-issue'),jobUrl:undefined};
   if(module==='backup' && form.get('action')==='restore-config')return {message:await restoreConfiguration(env,identity,form,fetcher),jobUrl:undefined};
   if (form.has('u_action')) return { message: await universalAction(env, identity, module, form, fetcher), jobUrl: undefined };
   if (['seo','changes'].includes(module) || form.get('action') === 'retry-delivery') return { message: await advancedAction(env, identity, module, form, fetcher), jobUrl: undefined };

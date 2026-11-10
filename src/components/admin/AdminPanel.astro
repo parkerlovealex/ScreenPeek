@@ -1,4 +1,5 @@
 ---
+import HealthReport from './HealthReport.astro';
 import BackupSnapshots from './BackupSnapshots.astro';
 import UniversalList from './UniversalList.astro';
 import AdminAdvanced from './AdminAdvanced.astro';
@@ -29,7 +30,7 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
   {actor && data && <>
     {!error && ['links','ads','content','pages','sync','seo','changes','titles','people'].includes(module) && <UniversalList actor={actor} module={module} />}
     {['dashboard','seo','changes'].includes(module) && <AdminAdvanced module={module} actor={actor} />}
-    {module === 'dashboard' && <>
+    {module === 'dashboard' && <><HealthReport actor={actor} />
       <div class="admin-meters"><section><h2>Catalogue</h2><p><strong>{data.catalogue?.titles.toLocaleString() || 0}</strong> titles · {data.catalogue?.gated.toLocaleString() || 0} index-ready</p><p>{data.catalogue?.people.toLocaleString() || 0} people</p></section><section><h2>Approx. clicks today</h2><p class="admin-big">≈ {data.catalogue?.clicks.toLocaleString() || 0}</p><small>UTC reporting day · best-effort totals</small></section><section><h2>Last sync</h2><p>{data.sync[0]?.status || 'No sync recorded'}</p>{data.sync[0] && <small>{date(data.sync[0].started_at)} · Bangladesh time</small>}</section><section><h2>Delivery health</h2><p>{data.pending ? `${data.pending} changes await propagation or purge.` : 'No pending delivery records.'}</p><a href="https://dash.cloudflare.com/" rel="noreferrer">Check Cloudflare quotas →</a><p>Quota and revenue numbers are not connected.</p></section></div>
       <section class="catalogue-section"><h2>Last 20 changes</h2>{data.changes.length ? <div class="admin-table"><table><thead><tr><th>When (Bangladesh)</th><th>Actor</th><th>Change</th></tr></thead><tbody>{data.changes.map(row => <tr><td>{date(row.ts)}</td><td>{row.actor || 'Not recorded'}</td><td>{row.entity} · {row.entity_id}</td></tr>)}</tbody></table></div> : <p class="quiet-empty">No admin changes yet.</p>}</section>
     </>}
@@ -57,7 +58,7 @@ const pageLink = (page: number) => { const query = new URLSearchParams(Astro.url
       <div class="admin-slot-board">{Object.entries(adMap).flatMap(([page, placements]) => placements.map(placement => {
         const row = data.slots.find(slot => slot.page_type === page && slot.placement === placement);
         const duplicates = row?.code.trim() ? data.slots.filter(other => other.code.trim() === row.code.trim() && (other.page_type !== page || other.placement !== placement)) : [];
-        return <section class="admin-slot"><h2>{page} / {placement}</h2><p class="eyebrow">{row?.code.trim() ? row.enabled ? 'FILLED · ON' : 'FILLED · OFF' : 'EMPTY'}</p>{duplicates.length > 0 && <p class="notice admin-error">Duplicate code also used in {duplicates.map(slot => `${slot.page_type}/${slot.placement}`).join(', ')}. Create separate provider placements.</p>}
+        return <section class="admin-slot" id={`slot-${page}-${placement}`}><h2>{page} / {placement}</h2><p class="eyebrow">{row?.code.trim() ? row.enabled ? 'FILLED · ON' : 'FILLED · OFF' : 'EMPTY'}</p>{duplicates.length > 0 && <p class="notice admin-error">Duplicate code also used in {duplicates.map(slot => `${slot.page_type}/${slot.placement}`).join(', ')}. Create separate provider placements.</p>}
           <form class="admin-form" method="post"><input type="hidden" name="page_type" value={page} /><input type="hidden" name="placement" value={placement} /><input type="hidden" name="revision" value={row?.revision ?? -1} /><fieldset disabled={!canWrite}>
             <label>Original code<textarea name="code" rows="5" maxlength="65536" spellcheck="false">{submitted?.get('page_type') === page && submitted?.get('placement') === placement ? submitted.get('code') : row?.code || ''}</textarea><small>Suggested provider placement name: {page}_{placement}. Code is stored unchanged.</small></label>
             <label class="admin-check"><input type="checkbox" name="enabled" value="1" checked={!!row?.enabled} /> Enabled</label><label class="admin-check"><input type="checkbox" name="test_mode" value="1" checked={!!row?.test_mode} /> Authenticated test mode</label>
