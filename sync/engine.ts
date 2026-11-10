@@ -125,6 +125,7 @@ export async function runSync(options: {
         for (const person of data.people) await syncPerson(person);
         data.credits = data.credits.filter(credit => !blocked.has(`person:${credit.person_id}`) && !people.get(credit.person_id)?.deleted_at);
         const locks = parseArray(previous?.locked_fields || '[]');
+        if(locks.length)console.info(`Kept manual edit fields for ${candidate.type}:${candidate.id}: ${locks.filter(field=>typeof field==='string'&&/^[a-z_]{1,40}$/.test(field)).join(', ')}`);
         const poster = locks.includes('poster_r2') ? { keys: { '185': previous?.poster_r2 || '' }, warning: null }
           : await processImage(client, images, { kind: 'poster', id: candidate.id, mediaType: candidate.type, path: data.images.poster });
         if (poster.warning) warn(poster.warning);
@@ -146,10 +147,10 @@ export async function runSync(options: {
         const gallery = backdrop.keys['300'] ? [backdrop.keys['300']] : [];
         rowsWritten += (await persistTitle(db, data, { poster: poster.keys['185'] || null, backdrop: backdrop.keys['300'] || null, gallery, posterColor: colour }, { popularityGate: threshold })).rowsWritten;
         const storedTitle = (await db.query<{ id: number; type: 'movie' | 'tv'; title: string; year: number | null; quality_gate: number; updated_at: string; locked_fields: string }>('SELECT id,type,title,year,quality_gate,updated_at,locked_fields FROM titles WHERE id=? AND type=? AND hidden=0 AND deleted=0 AND deleted_at IS NULL', [candidate.id, candidate.type]))[0];
-        if (storedTitle?.quality_gate && data.images.poster && !parseArray(storedTitle.locked_fields).some(field => ['og_r2','poster_r2'].includes(String(field)))) {
+        if (storedTitle?.quality_gate && poster.keys['185'] && !parseArray(storedTitle.locked_fields).includes('og_r2')) {
           try {
-            const key = await composeOg(client, images, { id: storedTitle.id, type: storedTitle.type, title: storedTitle.title, year: storedTitle.year, posterPath: data.images.poster, posterKey: poster.keys['185'], siteName: config.site_name || 'ScreenPeek' });
-            await batch([{ sql: "UPDATE titles SET og_r2=? WHERE id=? AND type=? AND updated_at=? AND quality_gate=1 AND hidden=0 AND deleted=0 AND deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM json_each(locked_fields) WHERE value IN ('og_r2','poster_r2'))", params: [key, storedTitle.id, storedTitle.type, storedTitle.updated_at] }]);
+            const key = await composeOg(client, images, { id: storedTitle.id, type: storedTitle.type, title: storedTitle.title, year: storedTitle.year, posterPath: locks.includes('poster_r2') ? null : data.images.poster, posterKey: poster.keys['185'], siteName: config.site_name || 'ScreenPeek' });
+            await batch([{ sql: "UPDATE titles SET og_r2=? WHERE id=? AND type=? AND updated_at=? AND quality_gate=1 AND hidden=0 AND deleted=0 AND deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM json_each(locked_fields) WHERE value='og_r2')", params: [key, storedTitle.id, storedTitle.type, storedTitle.updated_at] }]);
           } catch { warn(`${candidate.type}:${candidate.id}: sharing card generation failed.`); }
         }
         for (const season of data.seasons) {

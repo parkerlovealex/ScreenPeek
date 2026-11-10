@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { applyLocalSql, localBindings } from '../sync/local.ts';
+import { applyLocalSql, localBindings, applyLocalMigrations } from '../sync/local.ts';
 import { VoteBuffer } from '../src/lib/votes.ts';
 import { handleVote } from '../functions/api/vote.ts';
 
@@ -28,6 +28,7 @@ test('actual D1/KV aggregates votes, guards IP/title/day, separates media types,
   const tasks: Promise<unknown>[] = [], context = { waitUntil(promise: Promise<unknown>) { tasks.push(promise); } };
   try {
     await applyLocalSql(local.database, await readFile('db/schema.sql', 'utf8'));
+    await applyLocalMigrations(local.database);
     await local.db.batch([
       { sql: "INSERT INTO titles(id,type,slug,title) VALUES(42,'movie','test-movie','Test movie'),(42,'tv','test-tv','Test TV')" },
       { sql: "INSERT INTO titles(id,type,slug,title,hidden) VALUES(43,'movie','hidden','Hidden',1)" },

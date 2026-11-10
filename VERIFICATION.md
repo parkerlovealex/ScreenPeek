@@ -182,6 +182,8 @@ Not yet run. See the individual task sections for local verification. GitHub CI,
 
 ## Deferred deployment verification
 
+- **1.37:** targeted import/refetch dispatch is validated with simulated GitHub responses; execute it with real Actions/TMDb/R2 credentials during deployment setup.
+
 - **1.35:** verify the private BACKUPS binding and configuration restore against staged cloud resources; local upload, pre-snapshot, D1 replacement and resumable KV propagation are tested without a live account.
 
 - **1.34:** configure/verify the separate private R2 backup bucket, scoped S3 keys and first scheduled backup/retention; repeat restoration against a separate cloud D1. No public backup storage is permitted.
@@ -233,3 +235,7 @@ Six native admin tests, 51 catalogue tests, 21 sync tests, five hybrid tests and
 ## 1.36 — not-working report
 
 Native diagnostics test verifies failed syncs, missing/short title metadata, empty and duplicate slots, visited 404s, role-filtered results, fresh measured quota warnings above 80%, unavailable telemetry, snoozing and automatic clearing after repair. A browser test verifies Fix links and snooze/reopen forms. Report pages paginate at 50 rows, do not call source APIs, and never invent live quota values. Build/typecheck pass. Live Cloudflare telemetry remains deferred; title metadata Fix controls are completed with the next task’s editor.
+
+## 1.37 — Titles & People editor
+
+Eight native admin tests, two vote tests, eleven image tests, 21 sync integration tests and the editor browser flow pass. Editors validate metadata and owned WebP references, automatically lock changes against sync, reject stale revision/timestamp saves, update FTS/lookups/quality gates and preserve safe slug redirects. Undo restores metadata and original lock state. Owner permanent deletion requires confirmation and creates a never-import entry; title tombstones remain 410. Targeted imports are role-checked and dispatched to the existing workflow, with deployment false. Vote reset advances an epoch so buffered pre-reset votes cannot reappear. People biography edits retain sync locks. Build/typecheck pass; real imports remain deferred.

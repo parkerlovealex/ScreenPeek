@@ -25,6 +25,7 @@ const like = (text: string) => `%${text.replaceAll('\\','\\\\').replaceAll('%','
 export function listSpec(actor: AdminIdentity, name: string) {
   const spec = Object.hasOwn(lists,name) ? lists[name] : undefined;
   if (!spec) throw new AdminError('Unknown record list.');
+  if(name==='titles'&&permitted(actor,'titles'))return spec;
   requirePermission(actor,spec.module); return spec;
 }
 export function rowKey(spec: Spec,row: AdminRow) { return JSON.stringify(spec.keys.map(key => row[key])); }
@@ -39,6 +40,7 @@ export async function listData(env: AdminEnvironment, actor: AdminIdentity, name
     if(!permitted(actor,'settings'))clauses.push("NOT(entity='config' AND entity_id NOT IN ('google_site_verification','bing_site_verification'))");
   }
   if(name==='admin_trash'){const names=Object.keys(lists).filter(key=>lists[key].trash&&permitted(actor,lists[key].module));clauses.push('entity IN(SELECT value FROM json_each(?))');params.push(JSON.stringify(names));}
+  if(['titles','people'].includes(name)&&state!=='all')clauses.push('deleted=0');
   if (spec.trash) clauses.push(state === 'trash' ? 'deleted_at IS NOT NULL' : state === 'all' ? '1' : 'deleted_at IS NULL');
   const flag = ['enabled','hidden','pinned'].find(key => spec.fields.includes(key));
   if (flag && ['0','1'].includes(url.searchParams.get('uflag') || '')) { clauses.push(`${flag}=?`); params.push(Number(url.searchParams.get('uflag'))); }
@@ -148,7 +150,7 @@ export async function undoBulk(env:AdminEnvironment,actor:AdminIdentity,id:numbe
   return savedMessage(await deliverChange(env,Number(results.at(-1)?.meta.last_row_id),fetcher));
 }
 export async function universalAction(env:AdminEnvironment,actor:AdminIdentity,module:AdminModule,form:URLSearchParams,fetcher:typeof fetch=fetch) {
-  const name=form.get('list')||'',spec=listSpec(actor,name); requirePermission(actor,spec.module,true); requirePermission(actor,module,true);
+  const name=form.get('list')||'',spec=listSpec(actor,name); requirePermission(actor,name==='titles'&&module==='titles'?'titles':spec.module,true); requirePermission(actor,module,true);
   const operation=form.get('u_action')||'', statements:D1PreparedStatement[]=[], before:AdminRow[]=[], after:AdminRow[]=[], mirrors:MirrorRef[]=[];
   if(operation==='purge'&&actor.role!=='owner')throw new AdminError('Only the owner can permanently purge Trash.',403);
   if(operation==='add'){
@@ -192,6 +194,7 @@ export async function universalAction(env:AdminEnvironment,actor:AdminIdentity,m
         statements.push(env.DB.prepare("INSERT OR IGNORE INTO blocklist(tmdb_id,type,reason) VALUES(?,?,'Owner purge')").bind(current.id,current.type));
         next.deleted=1;next.deleted_at=null;next.hidden=0;next.overview=null;next.poster_r2=null;next.quality_gate=0;
       }else{
+        if(name==='people')statements.push(env.DB.prepare("INSERT OR IGNORE INTO blocklist(tmdb_id,type,reason) VALUES(?,'person','Owner purge')").bind(current.id));
         statements.push(env.DB.prepare(`DELETE FROM ${spec.table} WHERE ${where}`).bind(...keys));
         statements.push(env.DB.prepare('DELETE FROM admin_trash WHERE entity=? AND entity_key=?').bind(name,value));
         before.push(current);after.push({...current,deleted_at:'purged'});mirrors.push(...mirrorsFor(name,current));continue;

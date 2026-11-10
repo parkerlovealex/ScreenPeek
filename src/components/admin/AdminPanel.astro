@@ -11,7 +11,7 @@ import { adMap } from '../../lib/ads';
 import { dhakaInput, settingsFields } from '../../lib/admin/actions';
 interface Props { module: AdminModule; actor?: AdminIdentity; data?: AdminData; error?: string; message?: string; jobUrl?: string; platformAds?: boolean; secrets?: Array<{ name: string; set: boolean }>; submitted?: URLSearchParams; }
 const { module, actor, data, error, message, jobUrl, platformAds = false, secrets = [], submitted } = Astro.props;
-const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', pages: 'Pages', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export', seo: 'SEO Center', changes: 'Change Log' } as const;
+const modules = { dashboard: 'Dashboard', links: 'Link Manager', ads: 'Ad Manager', content: 'Content', pages: 'Pages', sync: 'Sync & Data', settings: 'Settings', backup: 'Backup export', seo: 'SEO Center', changes: 'Change Log', titles: 'Titles', people: 'People' } as const;
 const heading = modules[module as keyof typeof modules] || 'Admin';
 const canWrite = actor && permitted(actor, module, true);
 const link = data?.selectedLink;

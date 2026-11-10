@@ -8,7 +8,8 @@ export function redirectTarget(value: string, origin: string) {
   } catch { return null; }
 }
 export async function storedRedirect(db: D1Database, path: string, origin: string) {
-  const row = await db.prepare('SELECT to_target,type FROM redirects WHERE from_path=? AND deleted_at IS NULL').bind(path).first<{ to_target: string; type: number }>();
+  let row = await db.prepare('SELECT to_target,type FROM redirects WHERE from_path=? AND deleted_at IS NULL').bind(path).first<{ to_target: string; type: number }>();
+  if(!row&&/^\/tv\/[^/]+\/season\//.test(path)){const root=path.split('/').slice(0,3).join('/')+'/';const parent=await db.prepare('SELECT to_target,type FROM redirects WHERE from_path=? AND deleted_at IS NULL').bind(root).first<{to_target:string;type:number}>();if(parent&&parent.type===301){const base=redirectTarget(parent.to_target,origin);if(base&&base.startsWith('/tv/')&&base.endsWith('/'))row={type:301,to_target:base+path.slice(root.length)};}}
   if (!row || row.type !== 301) return null;
   const target = redirectTarget(row.to_target, origin);
   return target && new URL(target, origin).pathname !== path ? target : null;

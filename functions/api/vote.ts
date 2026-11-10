@@ -38,9 +38,9 @@ export async function handleVote(request: Request, env: VoteEnvironment, context
   }
   if (!validId(id) || !validType(type) || (request.method === 'POST' && !voteChoices.includes(choice as VoteChoice))) return reply({ error: 'Invalid vote.' }, 400);
   try {
-    const title = await env.DB.prepare('SELECT id FROM titles WHERE id=? AND type=? AND hidden=0 AND deleted=0 AND deleted_at IS NULL').bind(id, type).first();
+    const title = await env.DB.prepare('SELECT id,vote_epoch FROM titles WHERE id=? AND type=? AND hidden=0 AND deleted=0 AND deleted_at IS NULL').bind(id, type).first<{id:number;vote_epoch:number}>();
     if (!title) return reply({ error: 'Title not found.' }, 404);
-    if (request.method === 'GET') return reply({ counts: await readVotes(env.DB, id, type), approximate: true });
+    if (request.method === 'GET') return reply({ counts: await readVotes(env.DB, id, type, title.vote_epoch), approximate: true });
     // Cloudflare supplies this header. Missing metadata shares a conservative
     // fallback bucket rather than accepting an untrusted forwarded IP header.
     const ip = request.headers.get('CF-Connecting-IP') || 'unavailable';
@@ -48,11 +48,11 @@ export async function handleVote(request: Request, env: VoteEnvironment, context
     const day = now.toISOString().slice(0, 10);
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify([day, ip, type, id])));
     const key = `vote:${day}:${Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')}`;
-    if (await env.CONFIG.get(key)) return reply({ error: 'A vote for this title was already received today.', duplicate: true, counts: await readVotes(env.DB, id, type), approximate: true }, 409);
+    if (await env.CONFIG.get(key)) return reply({ error: 'A vote for this title was already received today.', duplicate: true, counts: await readVotes(env.DB, id, type, title.vote_epoch), approximate: true }, 409);
     // KV is eventually consistent: this is a basic abuse guard, not a lock.
     const midnight = Date.parse(`${day}T00:00:00Z`) + 86_400_000;
     await env.CONFIG.put(key, '1', { expirationTtl: Math.max(60, Math.ceil((midnight - now.getTime()) / 1000)) });
-    queueVote(env.DB, context, { id, type, choice: choice as VoteChoice });
-    return reply({ accepted: true, counts: await readVotes(env.DB, id, type), approximate: true }, 202);
+    queueVote(env.DB, context, { id, type, choice: choice as VoteChoice, epoch: title.vote_epoch });
+    return reply({ accepted: true, counts: await readVotes(env.DB, id, type, title.vote_epoch), approximate: true }, 202);
   } catch { return reply({ error: 'Voting is temporarily unavailable. Please try again.' }, 503); }
 }

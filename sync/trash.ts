@@ -19,6 +19,7 @@ export async function purgeExpiredTrash(db:SqlClient,date=new Date(),maxRows=100
         statements.push({sql:"INSERT OR IGNORE INTO blocklist(tmdb_id,type,reason) VALUES(?,?,'Trash expired after 30 days')",params:[Number(current.id),String(current.type)]});
         statements.push({sql:"UPDATE titles SET deleted=1,deleted_at=NULL,hidden=0,overview=NULL,poster_r2=NULL,quality_gate=0,revision=revision+1 WHERE id=? AND type=? AND datetime(deleted_at)<=datetime(?)",params:[Number(current.id),String(current.type),cutoff]});
       }else{
+        if(row.entity==='people')statements.push({sql:"INSERT OR IGNORE INTO blocklist(tmdb_id,type,reason) VALUES(?,'person','Trash expired after 30 days')",params:[Number(current.id)]});
         if(row.entity==='collections')statements.push({sql:'DELETE FROM collection_titles WHERE collection_slug=?',params:[String(current.slug)]});
         statements.push({sql:`DELETE FROM ${row.entity} WHERE ${where} AND datetime(deleted_at)<=datetime(?)`,params:[...params,cutoff]});
       }

@@ -12,7 +12,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const admin = path === '/admin' || path.startsWith('/admin/');
   const publicPage = !admin && !/^\/(?:api|go)(?:\/|$)/.test(path);
   if (publicPage && ['GET', 'HEAD'].includes(context.request.method)) {
-    try { const target = await storedRedirect(env.DB, context.url.pathname, context.url.origin); if (target) return new Response(null, { status: 301, headers: { Location: target, 'Cache-Control': 'public, max-age=300' } }); } catch { /* Normal rendering handles database failures. */ }
+    try { const target = await storedRedirect(env.DB, context.url.pathname, context.url.origin); if (target) {const location=new URL(target,context.url);if(!location.search)location.search=context.url.search;return new Response(null, { status: 301, headers: { Location: location.pathname+location.search+location.hash, 'Cache-Control': 'public, max-age=300' } });} } catch { /* Normal rendering handles database failures. */ }
   }
   const adTest = context.url.searchParams.get('adtest') === '1';
   if (!admin && path !== '/maintenance/') {

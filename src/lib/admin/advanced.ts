@@ -1,3 +1,4 @@
+import { undoMetadata } from './metadata.ts';
 import { undoBulk } from './universal.ts';
 import { AdminError, permitted, requirePermission } from './access.ts';
 import type { AdminIdentity, AdminModule } from './access.ts';
@@ -16,6 +17,7 @@ const definitions = {
 export async function undoChange(env: AdminEnvironment, actor: AdminIdentity, id: number, fetcher: typeof fetch = fetch) {
   if (!Number.isSafeInteger(id) || id < 1) throw new AdminError('Choose a valid change record.');
   const log = await env.DB.prepare('SELECT * FROM admin_log WHERE id=?').bind(id).first<AdminRow>();
+  if(log && ['title','person'].includes(String(log.entity)) && log.after && String(log.after).includes('locked_fields'))return undoMetadata(env,actor,id,fetcher);
   if (log?.entity && String(log.entity).startsWith('bulk:')) return undoBulk(env,actor,id,fetcher);
   if (!log || !Object.hasOwn(definitions, String(log.entity))) throw new AdminError('This change cannot be undone here.');
   const def = definitions[String(log.entity) as keyof typeof definitions];
